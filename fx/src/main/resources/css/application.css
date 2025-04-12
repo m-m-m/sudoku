@@ -15,14 +15,17 @@
 .field.candidates {
 	-fx-font-size: 12px;
 }
+.field.error {
+  -fx-background-color: red !important;
+}
 .field.selected {
-	-fx-background-color: red;
+	-fx-background-color: #FFA000;
 }
 .field.highlighted {
-  -fx-background-color: orange;
+  -fx-background-color: #FFE000;
 }
 .field.candidates.highlighted {
-  -fx-background-color: yellow;
+  -fx-background-color: #FFFF00;
 }
 .field.given {
 	-fx-font-weight: bolder;

@@ -89,21 +89,13 @@ public class ChangeSet implements ChangeAware {
   @Override
   public void undo() {
 
-    ChangeEvent current = this.change;
-    do {
-      current.undo();
-      current = current.next();
-    } while (current != null);
+    this.change.undoAll();
   }
 
   @Override
   public void redo() {
 
-    ChangeEvent current = this.change;
-    do {
-      current.redo();
-      current = current.next();
-    } while (current != null);
+    this.change.redoAll();
   }
 
 }

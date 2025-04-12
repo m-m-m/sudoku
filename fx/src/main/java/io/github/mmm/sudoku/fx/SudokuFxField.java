@@ -4,6 +4,7 @@ package io.github.mmm.sudoku.fx;
 
 import io.github.mmm.sudoku.Sudoku;
 import io.github.mmm.sudoku.child.Field;
+import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
@@ -26,6 +27,8 @@ public class SudokuFxField extends Region implements SudokuFxView {
   private static final String STYLE_SELECTED = "selected";
 
   private static final String STYLE_HIGHLIGHTED = "highlighted";
+
+  private static final String STYLE_ERROR = "error";
 
   private final SudokuFxBoard fxBoard;
 
@@ -99,14 +102,11 @@ public class SudokuFxField extends Region implements SudokuFxView {
   public void update() {
 
     Sudoku sudoku = getSudoku();
-    int value = this.field.getValue();
-    String styleRemove = STYLE_CANDIDATES;
-    String styleAdd = STYLE_VALUE;
-    if (value > 0) {
+    boolean hasValue = this.field.hasValue();
+    if (hasValue) {
+      int value = this.field.getValue();
       this.text.setText(sudoku.getSymbol(value));
     } else {
-      styleRemove = STYLE_VALUE;
-      styleAdd = STYLE_CANDIDATES;
       int size = sudoku.getSize();
       int base = sudoku.getBase();
       int rowCount = 0;
@@ -129,8 +129,17 @@ public class SudokuFxField extends Region implements SudokuFxView {
       }
       this.text.setText(sb.toString());
     }
-    getStyleClass().remove(styleRemove);
-    getStyleClass().add(styleAdd);
+    updateStyle(STYLE_VALUE, hasValue);
+    updateStyle(STYLE_CANDIDATES, !hasValue);
+    updateError();
+  }
+
+  /**
+   * Updates the {@link Field#isError() error flag} in this view.
+   */
+  public void updateError() {
+
+    updateStyle(STYLE_ERROR, this.field.isError());
   }
 
   /**
@@ -138,10 +147,18 @@ public class SudokuFxField extends Region implements SudokuFxView {
    */
   public void highlight(int value) {
 
-    if (this.field.hasCandidate(value)) {
-      getStyleClass().add(STYLE_HIGHLIGHTED);
+    updateStyle(STYLE_HIGHLIGHTED, this.field.hasCandidate(value));
+  }
+
+  private void updateStyle(String style, boolean active) {
+
+    ObservableList<String> styleClass = getStyleClass();
+    if (active) {
+      if (!styleClass.contains(style)) {
+        styleClass.add(style);
+      }
     } else {
-      getStyleClass().remove(STYLE_HIGHLIGHTED);
+      styleClass.remove(style);
     }
   }
 

@@ -49,14 +49,23 @@ public class SudokuFxSymbolButtons extends GridPane implements SudokuContainer {
     int i = 1;
     for (int y = 0; y < width; y++) {
       for (int x = 0; x < height; x++) {
-        String symbol = this.sudoku.getSymbol(i++);
-        Button button = new Button(symbol);
+        Button button = createButton(i++);
         add(button, x, y);
         if (i > size) {
           break;
         }
       }
     }
+  }
+
+  private Button createButton(int value) {
+
+    String symbol = this.sudoku.getSymbol(value);
+    Button button = new Button(symbol);
+    button.setOnAction(e -> {
+      this.board.setValue(value);
+    });
+    return button;
   }
 
 }

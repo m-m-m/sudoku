@@ -19,4 +19,28 @@ public interface ChangeEvent extends ChangeAware {
    */
   ChangeEvent next();
 
+  /**
+   * Performs {@link #undo()} on this and all {@link #next() next events}.
+   */
+  default void undoAll() {
+
+    ChangeEvent current = this;
+    do {
+      current.undo();
+      current = current.next();
+    } while (current != null);
+  }
+
+  /**
+   * Performs {@link #redo()} on this and all {@link #next() next events}.
+   */
+  default void redoAll() {
+
+    ChangeEvent current = this;
+    do {
+      current.redo();
+      current = current.next();
+    } while (current != null);
+  }
+
 }

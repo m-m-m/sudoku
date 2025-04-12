@@ -19,9 +19,8 @@ import io.github.mmm.sudoku.style.ColorType;
  */
 public class Field extends SudokuChildObject {
 
-  private static final int UNINITIALIZED = -2;
-
-  private static final int UNDEFINED = -1;
+  /** {@link #getValue() Value} if undefined. */
+  public static final int UNDEFINED = -1;
 
   private final int[] partitionIndexes;
 
@@ -34,6 +33,8 @@ public class Field extends SudokuChildObject {
   private int solution;
 
   private final BitSet excludedCandidates;
+
+  private boolean error;
 
   /**
    * The constructor.
@@ -48,11 +49,8 @@ public class Field extends SudokuChildObject {
     this.partitionIndexes = new int[sudoku.getPartitionings().size()];
     this.partitionIndexes[0] = x;
     this.partitionIndexes[1] = y;
-    for (int i = 2; i < this.partitionIndexes.length; i++) {
-      this.partitionIndexes[i] = UNINITIALIZED;
-    }
-    this.value = -1;
-    this.solution = -1;
+    this.value = UNDEFINED;
+    this.solution = UNDEFINED;
     this.excludedCandidates = new BitSet();
   }
 
@@ -65,7 +63,7 @@ public class Field extends SudokuChildObject {
   public int getPartitionIndex(Partitioning partitioning) {
 
     int id = partitioning.getId();
-    if (this.partitionIndexes[id] == UNINITIALIZED) {
+    if (this.partitionIndexes[id] == 0) {
       initPartitionIndexes();
     }
     return this.partitionIndexes[id];
@@ -81,7 +79,7 @@ public class Field extends SudokuChildObject {
         for (int partitionIndex = 1; partitionIndex <= partitionCount; partitionIndex++) {
           for (int fieldIndex = 1; fieldIndex <= size; fieldIndex++) {
             Field field = partitioning.getPartitionField(partitionIndex, fieldIndex);
-            assert (field.partitionIndexes[id] == UNINITIALIZED);
+            assert (field.partitionIndexes[id] == 0);
             field.partitionIndexes[id] = partitionIndex;
           }
         }
@@ -91,7 +89,7 @@ public class Field extends SudokuChildObject {
       for (int y = 1; y <= size; y++) {
         Field field = this.sudoku.getField(x, y);
         for (int i = 2; i < field.partitionIndexes.length; i++) {
-          if (field.partitionIndexes[i] == UNINITIALIZED) {
+          if (field.partitionIndexes[i] == 0) {
             field.partitionIndexes[i] = UNDEFINED; // field not reachable within this partitioning
           }
         }
@@ -261,7 +259,10 @@ public class Field extends SudokuChildObject {
     if (this.value > 0) {
       return (this.value == i);
     }
-    return !this.excludedCandidates.get(i - 1);
+    if (i <= 0) {
+      return false;
+    }
+    return !this.excludedCandidates.get(i);
   }
 
   /**
@@ -270,7 +271,8 @@ public class Field extends SudokuChildObject {
    */
   public void excludeCandidate(int i) {
 
-    this.excludedCandidates.set(i - 1);
+    validateValue(i);
+    this.excludedCandidates.set(i);
   }
 
   /**
@@ -279,18 +281,27 @@ public class Field extends SudokuChildObject {
    */
   public void includeCandidate(int i) {
 
-    this.excludedCandidates.clear(i - 1);
+    validateValue(i);
+    this.excludedCandidates.clear(i);
   }
 
   /**
-   * @return the value or {@code -1} if not (yet) defined. Please note that the value is an internal representation that
-   *         needs to be mapped to a {@link Sudoku#getSymbol(int) symbol} for presentation to the end-user. Typically
-   *         the mapping is trivial and {@code 1} is mapped to "1" (and {@code 16} to "F") but this is configured and
-   *         symbols could also be emojis or whatever.
+   * @return the value or {@link #UNDEFINED -1} if not (yet) {@link #hasValue() defined}. Please note that the value is
+   *         an internal representation that needs to be mapped to a {@link Sudoku#getSymbol(int) symbol} for
+   *         presentation to the end-user. Typically the mapping is trivial and {@code 1} is mapped to "1" but this is
+   *         configured and symbols could also be emojis or whatever.
    */
   public int getValue() {
 
     return this.value;
+  }
+
+  /**
+   * @return {@code true} if the {@link #getValue() value} is defined, {@code false} otherwise (see {@link #UNDEFINED}).
+   */
+  public boolean hasValue() {
+
+    return (this.value != UNDEFINED);
   }
 
   /**
@@ -313,6 +324,7 @@ public class Field extends SudokuChildObject {
    */
   public void setValue(int value, boolean given) {
 
+    validateValue(value, !given);
     this.value = value;
     if (given) {
       this.given = given;
@@ -332,7 +344,29 @@ public class Field extends SudokuChildObject {
    */
   public void setSolution(int solution) {
 
+    validateValue(solution, true);
     this.solution = solution;
+  }
+
+  private void validateValue(int v) {
+
+    validateValue(v, false);
+  }
+
+  private void validateValue(int v, boolean acceptUndefined) {
+
+    if ((v > this.sudoku.getSize()) || (v <= 0) && (!acceptUndefined || (v != UNDEFINED))) {
+      throw new IllegalArgumentException(Integer.toString(v));
+    }
+  }
+
+  /**
+   * @return {@code true} if the {@link #getSolution() solution} is defined, {@code false} otherwise (see
+   *         {@link #UNDEFINED}).
+   */
+  public boolean hasSolution() {
+
+    return (this.solution != UNDEFINED);
   }
 
   /**
@@ -342,5 +376,31 @@ public class Field extends SudokuChildObject {
   public boolean isGiven() {
 
     return this.given;
+  }
+
+  /**
+   * @return {@code true} if this {@link Field} is currently marked as error (conflicts with other value), {@code false}
+   *         otherwise.
+   */
+  public boolean isError() {
+
+    return this.error;
+  }
+
+  /**
+   * <b>ATTENTION:</b> Internal method that should not be invoked directly.
+   *
+   * @param error new value of {@link #isError()}.
+   */
+  public void setError(boolean error) {
+
+    this.error = error;
+  }
+
+  @Override
+  public String toString() {
+
+    return "Field " + getX() + "x" + getY() + " value=" + this.value + " excluded=" + this.excludedCandidates
+        + " solution=" + this.solution + " error=" + this.error;
   }
 }

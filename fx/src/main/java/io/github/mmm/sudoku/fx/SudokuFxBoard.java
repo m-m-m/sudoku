@@ -61,22 +61,34 @@ public class SudokuFxBoard extends GridPane implements SudokuFxView {
     if (this.selectedFxField != null) {
       this.selectedFxField.setSelected(false);
     }
-    this.selectedFxField = fxField;
-    this.selectedFxField.setSelected(true);
-    highlightFields();
+    if (this.selectedFxField == fxField) {
+      // deselection
+      this.selectedFxField = null;
+    } else {
+      this.selectedFxField = fxField;
+      this.selectedFxField.setSelected(true);
+    }
+    update();
   }
 
-  private void highlightFields() {
+  /**
+   * @param value the new {@link Field#getValue() field value} to set in the selected field.
+   * @return {@code true} if the value has been successfully set, {@code false} otherwise (no field selected, selected
+   *         field has {@link Field#isGiven() given clue}, etc.).
+   * @see Sudoku#setFieldValue(Field, int)
+   */
+  public boolean setValue(int value) {
 
-    int value = this.selectedFxField.getField().getValue();
-    if (value < 0) {
-      return;
+    if (this.selectedFxField == null) {
+      return false;
     }
-    for (Node child : getChildren()) {
-      if ((child != this.selectedFxField) && (child instanceof SudokuFxField fxField)) {
-        fxField.highlight(value);
-      }
+    Field field = this.selectedFxField.getField();
+    if (field.isGiven()) {
+      return false;
     }
+    this.sudoku.setFieldValue(field, value);
+    update();
+    return true;
   }
 
   /**
@@ -94,8 +106,17 @@ public class SudokuFxBoard extends GridPane implements SudokuFxView {
   @Override
   public void update() {
 
+    int value = Field.UNDEFINED;
+    if (this.selectedFxField != null) {
+      value = this.selectedFxField.getField().getValue();
+    }
     for (Node child : getChildren()) {
       if (child instanceof SudokuFxField fxField) {
+        if (child == this.selectedFxField) {
+          fxField.highlight(Field.UNDEFINED);
+        } else {
+          fxField.highlight(value);
+        }
         fxField.update();
       }
     }

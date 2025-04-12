@@ -17,6 +17,7 @@ import io.github.mmm.sudoku.dimension.RegularDimension;
 import io.github.mmm.sudoku.history.ChangeAware;
 import io.github.mmm.sudoku.history.ChangeEvent;
 import io.github.mmm.sudoku.history.ChangeEventExcludeCandidate;
+import io.github.mmm.sudoku.history.ChangeEventMarkError;
 import io.github.mmm.sudoku.history.ChangeEventSetValue;
 import io.github.mmm.sudoku.history.ChangeSet;
 
@@ -157,37 +158,51 @@ public abstract class Sudoku implements Dimension, ChangeAware {
   public void setFieldValue(Field field, int value, boolean given) {
 
     int size = getSize();
-    if ((value <= 0) || (value > size)) {
-      throw new IllegalArgumentException("" + value);
-    }
     int oldValue = field.getValue();
     if (oldValue == value) {
       return;
     }
     field.setValue(value, given);
+    System.out.println("Set value in " + field);
     ChangeEvent change = new ChangeEventSetValue(field, oldValue, value, null);
-    for (Partitioning partitioning : this.partitionings) {
-      int partitionIndex = field.getPartitionIndex(partitioning);
-      if (partitionIndex >= 0) {
-        for (int fieldIndex = 1; fieldIndex <= size; fieldIndex++) {
-          Field neighbour = partitioning.getPartitionField(partitionIndex, fieldIndex);
-          if ((neighbour != field) && (neighbour.getValue() < 0)) {
-            if (neighbour.hasCandidate(value)) {
-              System.out.println("Eliminating cadidate " + value + " from field " + neighbour.getX() + "x"
-                  + neighbour.getY() + " because of field " + field.getX() + "x" + field.getY());
-              change = new ChangeEventExcludeCandidate(field, value, change);
-              neighbour.excludeCandidate(value);
-            } else {
-              System.out.println("Cant remove cadidate " + value + " from field " + neighbour.getX() + "x"
-                  + neighbour.getY() + " because of field " + field.getX() + "x" + field.getY());
+    if (value > 0) {
+      for (Partitioning partitioning : this.partitionings) {
+        int partitionIndex = field.getPartitionIndex(partitioning);
+        if (partitionIndex >= 0) {
+          System.out.println("Updating partition " + partitionIndex + " of " + partitioning.getName());
+          for (int fieldIndex = 1; fieldIndex <= size; fieldIndex++) {
+            Field neighbour = partitioning.getPartitionField(partitionIndex, fieldIndex);
+            if (neighbour != field) {
+              if (neighbour.hasCandidate(value)) {
+                System.out.println(neighbour);
+                if (neighbour.hasValue()) {
+                  change = setError(field, change);
+                  change = setError(neighbour, change);
+                } else {
+                  change = new ChangeEventExcludeCandidate(field, value, change);
+                  neighbour.excludeCandidate(value);
+                }
+                System.out.println("Updated " + neighbour);
+              }
             }
           }
         }
       }
     }
-    if (!given) {
+    if (given) {
+      assert (this.lastChange == null) : "Given clues should be set before actual values!";
+    } else {
       this.lastChange = new ChangeSet(change, this.lastChange); // append undo log
     }
+  }
+
+  private ChangeEvent setError(Field field, ChangeEvent change) {
+
+    if (!field.isError()) {
+      change = new ChangeEventMarkError(field, change);
+      field.setError(true);
+    }
+    return change;
   }
 
   /**
