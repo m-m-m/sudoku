@@ -1,0 +1,101 @@
+.board {
+}
+.field {
+	-fx-border-style: solid;
+  -fx-border-color: black;
+  -fx-padding: 10;
+}
+.label {
+  -fx-font-family: Consolas;
+  -fx-padding: 8;
+}
+.field.value {
+	-fx-font-size: 32px;
+}
+.field.candidates {
+	-fx-font-size: 12px;
+}
+.field.selected {
+	-fx-background-color: red;
+}
+.field.highlighted {
+  -fx-background-color: orange;
+}
+.field.candidates.highlighted {
+  -fx-background-color: yellow;
+}
+.field.given {
+	-fx-font-weight: bolder;
+}
+.thick-border-t {
+	-fx-border-width: 3 1 1 1;
+}
+.thick-border-r {
+  -fx-border-width: 1 3 1 1;
+}
+.thick-border-b {
+	-fx-border-width: 1 1 3 1;
+}
+.thick-border-l {
+	-fx-border-width: 1 1 1 3;
+}
+.thick-border-tr {
+	-fx-border-width: 3 3 1 1;
+}
+.thick-border-tb {
+	-fx-border-width: 3 1 3 1;
+}
+.thick-border-tl {
+	-fx-border-width: 3 1 1 3;
+}
+.thick-border-rb {
+	-fx-border-width: 1 3 3 1;
+}
+.thick-border-rl {
+	-fx-border-width: 1 3 1 3;
+}
+.thick-border-bl {
+	-fx-border-width: 1 1 3 3;
+}
+.thick-border-trb {
+	-fx-border-width: 3 3 3 1;
+}
+.thick-border-trl {
+	-fx-border-width: 3 3 1 3;
+}
+.thick-border-tbl {
+	-fx-border-width: 3 1 3 3;
+}
+.thick-border-rbl {
+	-fx-border-width: 1 3 3 3;
+}
+.thick-border-trbl {
+	-fx-border-width: 3 3 3 3;
+}
+.color1 {
+	-fx-background-color: #A000E0;
+}
+.color2 {
+  -fx-background-color: #E000A0;
+}
+.color3 {
+  -fx-background-color: #00A0E0;
+}
+.color4 {
+  -fx-background-color: #E0E0A0;
+}
+.color5 {
+  -fx-background-color: #E0A0E0;
+}
+.color6 {
+  -fx-background-color: #A0E0E0;
+}
+.color7 {
+  -fx-background-color: #90A0E0;
+}
+.color8 {
+  -fx-background-color: #A0E090;
+}
+.color9 {
+  -fx-background-color: #E090A0;
+}

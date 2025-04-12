@@ -1,0 +1,72 @@
+image:https://m-m-m.github.io/logo.svg[logo,width="150",link="https://m-m-m.github.io"]
+
+image:https://img.shields.io/github/license/m-m-m/sudoku.svg?label=License["Apache License, Version 2.0",link=https://github.com/m-m-m/sudoku/blob/main/LICENSE]
+image:https://github.com/m-m-m/sudoku/actions/workflows/build.yml/badge.svg["Build Status",link="https://github.com/m-m-m/sudoku/actions/workflows/build.yml"]
+
+= mmm-sudoku
+
+image:https://img.shields.io/maven-central/v/io.github.m-m-m/mmm-sudoku.svg?label=Maven%20Central["Maven Central",link=https://search.maven.org/search?q=g:io.github.m-m-m]
+image:https://javadoc.io/badge2/io.github.m-m-m/mmm-sudoku/javadoc.svg["sudoku JavaDoc", link=https://javadoc.io/doc/io.github.m-m-m/mmm-sudoku]
+
+The module `io.github.mmm.sudoku` (artifactId `mmm-sudoku`) provides a flexible model and engine for Sudoku puzzles.
+Instead of hard-coding specific types of Sudokus we designed the Sudoku to have any number of `Partitioning`s.
+Each `Partitioning` can divide the Sudoku board entirely or partially into any number of partitions.
+Every Sudoku always has `Column` and `Row` as `Partitioning`. Most of them also have `Box` but a Jigsaw Sudoku (Squiggly Sudoku) has `Region`s that are typically non-rectangular. The latter even allows irregular `Dimension`s such as a 5x5 board.
+Even Killer Sudoku (SumDoku) is possible with this model.
+
+The great thing about this design is that implementations like solvers or generators as well as the UI presenting the game can stay generic and need little to no knowledge of the different kind of Sudokus (except for SumDokus that add a whole new concept to the game).
+
+== Features
+
+This library offers the following features:
+
+
+== Usage
+
+Maven Dependency:
+```xml
+<dependency>
+  <groupId>io.github.m-m-m</groupId>
+  <artifactId>mmm-sudoku</artifactId>
+  <version>${mmm.version}</version>
+</dependency>
+```
+
+Module Dependency:
+```java
+  requires transitive io.github.mmm.sudoku;
+```
+
+= mmm-sudoku-fx
+
+image:https://img.shields.io/maven-central/v/io.github.m-m-m/mmm-sudoku-fx.svg?label=Maven%20Central["Maven Central",link=https://search.maven.org/search?q=g:io.github.m-m-m]
+image:https://javadoc.io/badge2/io.github.m-m-m/mmm-sudoku-fx/javadoc.svg["SudokuFx JavaDoc", link=https://javadoc.io/doc/io.github.m-m-m/mmm-sudoku-fx]
+
+The module `io.github.mmm.sudoku.fx` (artifactId `mmm-sudoku-fx`) provides the JavaFx GUI for the sudoku game engine.
+
+== Features
+
+This library offers the following features:
+
+* Configuration of the Sudoku puzzle (dimension, difficulty, type, etc.)
+* Presentation of the Sudoku-Board.
+* Set values and candidates (pencil marks)
+* Unlimited undo/redo
+* Show candidates, get hits, etc.
+*
+
+== Usage
+
+Maven Dependency:
+```xml
+<dependency>
+  <groupId>io.github.m-m-m</groupId>
+  <artifactId>mmm-sudoku-fx</artifactId>
+  <version>${mmm.version}</version>
+</dependency>
+```
+
+Module Dependency:
+```java
+  requires transitive io.github.mmm.sudoku.fx;
+```

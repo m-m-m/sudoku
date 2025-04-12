@@ -1,0 +1,13 @@
+.*
+!.github
+!.gitignore
+!.gitattributes
+!.mvn
+*.bak
+*.log
+*.diff
+*.patch
+*.iml
+target
+eclipse-target
+war
