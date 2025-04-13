@@ -6,19 +6,14 @@ import io.github.mmm.sudoku.HyperSudoku;
 import io.github.mmm.sudoku.Sudoku;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 /**
  * JavaFx GUI for {@link Sudoku} puzzle game.
  */
-public class SudokuFx extends Application implements ValueCompletion {
+public class SudokuFx extends Application {
 
-  private SudokuFxBoard board;
-
-  private SudokuFxSymbolButtons mainButtons;
-
-  private Sudoku sudoku;
+  private SudokuFxPuzzle fxPuzzle;
 
   /**
    * @param args the main arguments.
@@ -31,28 +26,16 @@ public class SudokuFx extends Application implements ValueCompletion {
   @Override
   public void start(Stage primaryStage) throws Exception {
 
-    this.sudoku = generateSudoku();
-    this.board = new SudokuFxBoard(this);
-    this.mainButtons = new SudokuFxSymbolButtons(this.board);
+    Sudoku sudoku = generateSudoku();
+    this.fxPuzzle = new SudokuFxPuzzle(sudoku);
 
-    BorderPane root = new BorderPane();
-    root.setCenter(this.board);
-    root.setRight(this.mainButtons);
-    Scene scene = new Scene(root, 500, 500);
+    Scene scene = new Scene(this.fxPuzzle, 500, 500);
     scene.getStylesheets().add("file:src/main/resources/css/application.css");
     primaryStage.setScene(scene);
     primaryStage.setTitle("SudokuFx");
     primaryStage.show();
     primaryStage.setMinHeight(primaryStage.getHeight());
     primaryStage.setMinWidth(primaryStage.getWidth());
-  }
-
-  /**
-   * @return the {@link Sudoku}.
-   */
-  public Sudoku getSudoku() {
-
-    return this.sudoku;
   }
 
   private static Sudoku generateSudoku() {
@@ -80,12 +63,6 @@ public class SudokuFx extends Application implements ValueCompletion {
     sudoku.setFieldGivenValue(6, 9, 8);
     sudoku.setFieldGivenValue(8, 9, 9);
     return sudoku;
-  }
-
-  @Override
-  public void onValueCompletion(int value, boolean completed) {
-
-    this.mainButtons.onValueCompletion(value, completed);
   }
 
 }

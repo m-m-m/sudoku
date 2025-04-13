@@ -15,18 +15,18 @@ import javafx.scene.layout.GridPane;
  */
 public class SudokuFxSymbolButtons extends GridPane implements SudokuContainer, ValueCompletion {
 
-  private final SudokuFxBoard board;
+  private final SudokuFxPuzzle fxPuzzle;
 
   private final Sudoku sudoku;
 
   /**
    * The constructor.
    */
-  public SudokuFxSymbolButtons(SudokuFxBoard board) {
+  public SudokuFxSymbolButtons(SudokuFxPuzzle fxPuzzle) {
 
     super();
-    this.board = board;
-    this.sudoku = board.getSudoku();
+    this.fxPuzzle = fxPuzzle;
+    this.sudoku = fxPuzzle.getSudoku();
     getStyleClass().add("symbols");
     initButtons();
   }
@@ -63,7 +63,7 @@ public class SudokuFxSymbolButtons extends GridPane implements SudokuContainer, 
     String symbol = this.sudoku.getSymbol(value);
     Button button = new Button(symbol);
     button.setOnAction(e -> {
-      this.board.setValue(value);
+      this.fxPuzzle.setValue(value);
     });
     return button;
   }

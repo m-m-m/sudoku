@@ -8,7 +8,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.github.mmm.sudoku.Sudoku;
+import io.github.mmm.sudoku.event.SudokuChangeEventExcludeCandidate;
+import io.github.mmm.sudoku.event.SudokuChangeEventIncludeCandidate;
+import io.github.mmm.sudoku.event.SudokuChangeEventSetError;
+import io.github.mmm.sudoku.event.SudokuChangeEventSetValue;
+import io.github.mmm.sudoku.event.SudokuEvent;
 import io.github.mmm.sudoku.style.BorderStyle;
 import io.github.mmm.sudoku.style.BorderType;
 import io.github.mmm.sudoku.style.ColorType;
@@ -17,7 +25,9 @@ import io.github.mmm.sudoku.style.ColorType;
  * Represents a single {@link Field} of the {@link Sudoku} puzzle. It can either have a {@link #getValue() value} filled
  * (if not {@code -1}) or represent a list of {@link #hasCandidate(int) candidates}.
  */
-public class Field extends SudokuChildObject {
+public final class Field extends SudokuChildObject {
+
+  private static final Logger LOG = LoggerFactory.getLogger(Field.class);
 
   /** {@link #getValue() Value} if undefined. */
   public static final int UNDEFINED = -1;
@@ -52,6 +62,11 @@ public class Field extends SudokuChildObject {
     this.value = UNDEFINED;
     this.solution = UNDEFINED;
     this.excludedCandidates = new BitSet();
+  }
+
+  private boolean fireEvent(SudokuEvent<?> event) {
+
+    return this.sudoku.fireEvent(event);
   }
 
   /**
@@ -266,23 +281,33 @@ public class Field extends SudokuChildObject {
   }
 
   /**
-   * @param i the {@link #getValue() value} candidate to exclude in the range from {@code 1} to
+   * @param candidate the {@link #getValue() value} candidate to exclude in the range from {@code 1} to
    *        <code>{@link Sudoku#getSize()}</code>.
    */
-  public void excludeCandidate(int i) {
+  public void excludeCandidate(int candidate) {
 
-    validateValue(i);
-    this.excludedCandidates.set(i);
+    validateValue(candidate);
+    if (this.excludedCandidates.get(candidate)) {
+      LOG.trace("No change for excludeCandidate({}) in {}", candidate, this);
+      return;
+    }
+    this.excludedCandidates.set(candidate);
+    fireEvent(new SudokuChangeEventExcludeCandidate(this, candidate));
   }
 
   /**
-   * @param i the {@link #getValue() value} candidate to (re)include in the range from {@code 1} to
+   * @param candidate the {@link #getValue() value} candidate to (re)include in the range from {@code 1} to
    *        <code>{@link Sudoku#getSize()}</code>.
    */
-  public void includeCandidate(int i) {
+  public void includeCandidate(int candidate) {
 
-    validateValue(i);
-    this.excludedCandidates.clear(i);
+    validateValue(candidate);
+    if (!this.excludedCandidates.get(candidate)) {
+      LOG.trace("No change for includeCandidate({}) in {}", candidate, this);
+      return;
+    }
+    this.excludedCandidates.clear(candidate);
+    fireEvent(new SudokuChangeEventIncludeCandidate(this, candidate));
   }
 
   /**
@@ -361,12 +386,18 @@ public class Field extends SudokuChildObject {
    */
   public void setValue(int value, boolean given) {
 
+    if ((this.value == value) && (this.given == given)) {
+      LOG.trace("No change for setValue in {}", this);
+      return;
+    }
     validateValue(value, !given);
+    int oldValue = this.value;
     this.value = value;
     if (given) {
       this.given = true;
       this.solution = value;
     }
+    fireEvent(new SudokuChangeEventSetValue(this, oldValue, value));
   }
 
   /**
@@ -382,8 +413,14 @@ public class Field extends SudokuChildObject {
    */
   public void setSolution(int solution) {
 
+    if (this.solution == solution) {
+      LOG.trace("No change for setSolution in {}", this);
+      return;
+    }
     validateValue(solution, true);
+    int oldSolution = this.solution;
     this.solution = solution;
+    fireEvent(new SudokuChangeEventSetValue(this, oldSolution, solution));
   }
 
   private void validateValue(int v) {
@@ -432,7 +469,12 @@ public class Field extends SudokuChildObject {
    */
   public void setError(boolean error) {
 
+    if (this.error == error) {
+      LOG.trace("No change for setError in {}", this);
+      return;
+    }
     this.error = error;
+    fireEvent(new SudokuChangeEventSetError(this));
   }
 
   @Override

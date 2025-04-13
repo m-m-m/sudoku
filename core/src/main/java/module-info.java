@@ -5,11 +5,17 @@
  */
 module io.github.mmm.sudoku {
 
+  requires transitive org.slf4j;
+
+  requires transitive io.github.mmm.event;
+
   exports io.github.mmm.sudoku;
 
   exports io.github.mmm.sudoku.child;
 
   exports io.github.mmm.sudoku.dimension;
+
+  exports io.github.mmm.sudoku.event;
 
   exports io.github.mmm.sudoku.history;
 

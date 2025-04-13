@@ -3,13 +3,16 @@
 package io.github.mmm.sudoku.history;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 
 import io.github.mmm.sudoku.Sudoku;
+import io.github.mmm.sudoku.event.ChangeAware;
+import io.github.mmm.sudoku.event.SudokuChangeEvent;
 
 /**
- * A set of {@link ChangeEvent}s for an operation at a given {@link #getTimestamp() timestamp} to a {@link Sudoku} for
- * {@link #undo()}/{@link #redo()} history.
+ * A set of {@link SudokuChangeEvent}s for an operation at a given {@link #getTimestamp() timestamp} to a {@link Sudoku}
+ * for {@link #undo()}/{@link #redo()} history.
  */
 public class ChangeSet implements ChangeAware {
 
@@ -17,34 +20,34 @@ public class ChangeSet implements ChangeAware {
 
   private final ChangeSet previous;
 
-  private final ChangeEvent change;
+  private final List<SudokuChangeEvent<?>> changes;
 
   private ChangeSet next;
 
   /**
    * The constructor.
    *
-   * @param change the {@link #getChange() change}.
+   * @param changes the {@link #getChange(int) changes}.
    * @param previous the {@link #getPrevious() previous} {@link ChangeSet}.
    */
-  public ChangeSet(ChangeEvent change, ChangeSet previous) {
+  public ChangeSet(List<SudokuChangeEvent<?>> changes, ChangeSet previous) {
 
-    this(change, previous, Instant.now());
+    this(changes, previous, Instant.now());
   }
 
   /**
    * The constructor.
    *
-   * @param change the {@link #getChange() change}.
+   * @param changes the {@link #getChange(int) changes}.
    * @param previous the {@link #getPrevious() previous} {@link ChangeSet}.
    * @param timestamp the explicit {@link #getTimestamp() timestamp}.
    */
-  public ChangeSet(ChangeEvent change, ChangeSet previous, Instant timestamp) {
+  public ChangeSet(List<SudokuChangeEvent<?>> changes, ChangeSet previous, Instant timestamp) {
 
     super();
-    Objects.requireNonNull(change);
+    Objects.requireNonNull(changes);
     Objects.requireNonNull(timestamp);
-    this.change = change;
+    this.changes = changes;
     this.previous = previous;
     this.timestamp = timestamp;
     if (this.previous != null) {
@@ -61,12 +64,21 @@ public class ChangeSet implements ChangeAware {
   }
 
   /**
-   * @return the (first) {@link ChangeEvent}.
-   * @see ChangeEventSetValue#next()
+   * @param i the index of the requested {@link SudokuChangeEvent} in the range from {@code 0} to
+   *        <code>{@link #getChangeCount()}-1</code>.
+   * @return the requested {@link SudokuChangeEvent}.
    */
-  public ChangeEvent getChange() {
+  public SudokuChangeEvent<?> getChange(int i) {
 
-    return this.change;
+    return this.changes.get(i);
+  }
+
+  /**
+   * @return the number of {@link #getChange(int) changes}. Should be positive.
+   */
+  public int getChangeCount() {
+
+    return this.changes.size();
   }
 
   /**
@@ -89,13 +101,17 @@ public class ChangeSet implements ChangeAware {
   @Override
   public void undo() {
 
-    this.change.undoAll();
+    for (SudokuChangeEvent<?> event : this.changes) {
+      event.undo();
+    }
   }
 
   @Override
   public void redo() {
 
-    this.change.redoAll();
+    for (SudokuChangeEvent<?> event : this.changes) {
+      event.redo();
+    }
   }
 
 }

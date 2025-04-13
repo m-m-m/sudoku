@@ -6,6 +6,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.github.mmm.event.AbstractEventSender;
 import io.github.mmm.sudoku.child.Box;
 import io.github.mmm.sudoku.child.Column;
 import io.github.mmm.sudoku.child.Field;
@@ -14,11 +18,10 @@ import io.github.mmm.sudoku.child.Row;
 import io.github.mmm.sudoku.dimension.AbstractDimension;
 import io.github.mmm.sudoku.dimension.Dimension;
 import io.github.mmm.sudoku.dimension.RegularDimension;
-import io.github.mmm.sudoku.history.ChangeAware;
-import io.github.mmm.sudoku.history.ChangeEvent;
-import io.github.mmm.sudoku.history.ChangeEventExcludeCandidate;
-import io.github.mmm.sudoku.history.ChangeEventMarkError;
-import io.github.mmm.sudoku.history.ChangeEventSetValue;
+import io.github.mmm.sudoku.event.ChangeAware;
+import io.github.mmm.sudoku.event.SudokuChangeEvent;
+import io.github.mmm.sudoku.event.SudokuEvent;
+import io.github.mmm.sudoku.event.SudokuEventListener;
 import io.github.mmm.sudoku.history.ChangeSet;
 
 /**
@@ -43,7 +46,10 @@ import io.github.mmm.sudoku.history.ChangeSet;
  * }
  * </pre>
  */
-public abstract class Sudoku implements Dimension, ChangeAware {
+public abstract class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListener>
+    implements Dimension, ChangeAware {
+
+  private static final Logger LOG = LoggerFactory.getLogger(Sudoku.class);
 
   /** @see #getSize() */
   protected final AbstractDimension dimension;
@@ -53,6 +59,8 @@ public abstract class Sudoku implements Dimension, ChangeAware {
   private final List<Partitioning> partitionings;
 
   private ChangeSet lastChange;
+
+  private List<SudokuChangeEvent<?>> currentChanges;
 
   /**
    * The constructor.
@@ -175,27 +183,30 @@ public abstract class Sudoku implements Dimension, ChangeAware {
     if (oldValue == value) {
       return;
     }
+
     field.setValue(value, given);
-    System.out.println("Set value in " + field);
-    ChangeEvent change = new ChangeEventSetValue(field, oldValue, value, null);
+    ChangeSet changeSet = null;
+    if (!given) {
+      // collect change events in ChangeSet for undo feature
+      this.currentChanges = new ArrayList<>();
+      changeSet = new ChangeSet(this.currentChanges, this.lastChange);
+    }
     if (value > 0) {
       for (Partitioning partitioning : this.partitionings) {
         int partitionIndex = field.getPartitionIndex(partitioning);
         if (partitionIndex >= 0) {
-          System.out.println("Updating partition " + partitionIndex + " of " + partitioning.getName());
+          LOG.debug("Updating partition {} of {}", partitionIndex, partitioning.getName());
           for (int fieldIndex = 1; fieldIndex <= size; fieldIndex++) {
             Field neighbour = partitioning.getPartitionField(partitionIndex, fieldIndex);
             if (neighbour != field) {
               if (neighbour.hasCandidate(value)) {
                 System.out.println(neighbour);
                 if (neighbour.hasValue()) {
-                  change = setError(field, change);
-                  change = setError(neighbour, change);
+                  field.setError(true);
+                  neighbour.setError(true);
                 } else {
-                  change = new ChangeEventExcludeCandidate(field, value, change);
                   neighbour.excludeCandidate(value);
                 }
-                System.out.println("Updated " + neighbour);
               }
             }
           }
@@ -203,19 +214,13 @@ public abstract class Sudoku implements Dimension, ChangeAware {
       }
     }
     if (given) {
+      assert (changeSet == null);
+      assert (this.currentChanges == null);
       assert (this.lastChange == null) : "Given clues should be set before actual values!";
     } else {
-      this.lastChange = new ChangeSet(change, this.lastChange); // append undo log
+      this.currentChanges = null; // end "transaction" to record changes
+      this.lastChange = changeSet; // append undo log
     }
-  }
-
-  private ChangeEvent setError(Field field, ChangeEvent change) {
-
-    if (!field.isError()) {
-      change = new ChangeEventMarkError(field, change);
-      field.setError(true);
-    }
-    return change;
   }
 
   /**
@@ -275,6 +280,22 @@ public abstract class Sudoku implements Dimension, ChangeAware {
       }
     }
     return result;
+  }
+
+  /**
+   * Internal method - use only when you know what you are doing.
+   *
+   * @param event the {@link SudokuEvent} to send.
+   * @return {@code true} if dispatched, {@code false} otherwise (no listeners).
+   */
+  @Override
+  public boolean fireEvent(SudokuEvent<?> event) {
+
+    LOG.debug("{}", event);
+    if ((this.currentChanges != null) && (event instanceof SudokuChangeEvent<?> changeEvent)) {
+      this.currentChanges.add(changeEvent);
+    }
+    return super.fireEvent(event);
   }
 
 }

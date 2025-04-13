@@ -4,6 +4,7 @@ package io.github.mmm.sudoku.fx;
 
 import io.github.mmm.sudoku.Sudoku;
 import io.github.mmm.sudoku.child.Field;
+import io.github.mmm.sudoku.event.SudokuEventSelectField;
 import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
 import javafx.scene.control.Label;
@@ -69,7 +70,7 @@ public class SudokuFxField extends Region implements SudokuFxView {
 
   private void onClick(MouseEvent e) {
 
-    this.fxBoard.selectField(this);
+    getSudoku().fireEvent(new SudokuEventSelectField(this.field));
   }
 
   /**
