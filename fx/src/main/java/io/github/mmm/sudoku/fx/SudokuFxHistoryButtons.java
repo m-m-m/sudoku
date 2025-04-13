@@ -2,7 +2,6 @@ package io.github.mmm.sudoku.fx;
 
 import io.github.mmm.sudoku.Sudoku;
 import io.github.mmm.sudoku.history.ChangeSet;
-import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 
@@ -10,8 +9,6 @@ import javafx.scene.layout.HBox;
  * View with undo and redo buttons.
  */
 public class SudokuFxHistoryButtons extends HBox implements SudokuFxView {
-
-  private static final Insets PADDING = new Insets(5, 2, 5, 2);
 
   private final SudokuFxPuzzle fxPuzzle;
 

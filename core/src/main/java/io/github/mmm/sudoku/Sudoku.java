@@ -147,7 +147,7 @@ public abstract class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuE
   }
 
   /**
-   * Convenience method for {@link #setFieldValue(Field, int, boolean)} to set a {@link Field#isGiven() given}
+   * Convenience method for {@link #setFieldValue(Field, int, boolean, boolean)} to set a {@link Field#isGiven() given}
    * {@link Field#getValue() value}.
    *
    * @param x the column number starting from {@code 1}.
@@ -156,7 +156,7 @@ public abstract class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuE
    */
   public void setFieldGivenValue(int x, int y, int value) {
 
-    setFieldValue(getField(x, y), value, true);
+    setFieldValue(getField(x, y), value, true, false);
   }
 
   /**
@@ -167,7 +167,7 @@ public abstract class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuE
    */
   public void setFieldValue(Field field, int value) {
 
-    setFieldValue(field, value, false);
+    setFieldValue(field, value, false, true);
   }
 
   /**
@@ -177,8 +177,9 @@ public abstract class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuE
    * @param value the {@link Field#getValue() field value} to fill in.
    * @param given - {@code true} to set the {@link Field#isGiven() given-flag} and consider the value as a <em>clue</em>
    *        during initialisation.
+   * @param withHistory - {@code true} to add history events for {@link #undo() undo} support, {@code false} otherwise.
    */
-  public void setFieldValue(Field field, int value, boolean given) {
+  public void setFieldValue(Field field, int value, boolean given, boolean withHistory) {
 
     int size = getSize();
     int oldValue = field.getValue();
@@ -187,7 +188,7 @@ public abstract class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuE
     }
 
     ChangeSet changeSet = null;
-    if (!given) {
+    if (withHistory) {
       changeSet = startUndoHistory();
     }
     field.setValue(value, given);
@@ -212,12 +213,14 @@ public abstract class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuE
         }
       }
     }
-    if (given) {
+    if (withHistory) {
+      endUndoHistory(changeSet);
+    } else {
       assert (changeSet == null);
       assert (this.currentChanges == null);
-      assert (this.lastChange == null) : "Given clues should be set before actual values!";
-    } else {
-      endUndoHistory(changeSet);
+      if (given) {
+        assert (this.lastChange == null) : "Given clues should be set before actual values!";
+      }
     }
   }
 

@@ -15,6 +15,7 @@ import io.github.mmm.sudoku.Sudoku;
 import io.github.mmm.sudoku.event.SudokuChangeEventExcludeCandidate;
 import io.github.mmm.sudoku.event.SudokuChangeEventIncludeCandidate;
 import io.github.mmm.sudoku.event.SudokuChangeEventSetError;
+import io.github.mmm.sudoku.event.SudokuChangeEventSetMarked;
 import io.github.mmm.sudoku.event.SudokuChangeEventSetValue;
 import io.github.mmm.sudoku.event.SudokuEvent;
 import io.github.mmm.sudoku.style.BorderStyle;
@@ -45,6 +46,8 @@ public final class Field extends SudokuChildObject {
   private final BitSet excludedCandidates;
 
   private boolean error;
+
+  private boolean marked;
 
   /**
    * The constructor.
@@ -498,6 +501,29 @@ public final class Field extends SudokuChildObject {
     }
     this.error = error;
     fireEvent(new SudokuChangeEventSetError(this));
+    return true;
+  }
+
+  /**
+   * @return {@code true} if this {@link Field} is marked (special visualisation e.g. for hints), {@code false}
+   *         otherwise (unmarked).
+   */
+  public boolean isMarked() {
+
+    return this.marked;
+  }
+
+  /**
+   * @param marked the new value of {@link #isMarked()}.
+   * @return {@code true} if something actually changed, {@code false} otherwise.
+   */
+  public boolean setMarked(boolean marked) {
+
+    if (this.marked == marked) {
+      return false;
+    }
+    this.marked = marked;
+    fireEvent(new SudokuChangeEventSetMarked(this));
     return true;
   }
 
