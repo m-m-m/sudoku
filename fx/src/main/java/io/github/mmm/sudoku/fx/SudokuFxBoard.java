@@ -16,6 +16,8 @@ public class SudokuFxBoard extends GridPane implements SudokuFxView {
 
   private SudokuFxField selectedFxField;
 
+  private int selectedValue;
+
   /**
    * The constructor.
    *
@@ -27,6 +29,7 @@ public class SudokuFxBoard extends GridPane implements SudokuFxView {
     getStyleClass().add("board");
     this.sudoku = sudoku;
     initBoard();
+    this.selectedValue = Field.UNDEFINED;
   }
 
   @Override
@@ -108,15 +111,21 @@ public class SudokuFxBoard extends GridPane implements SudokuFxView {
 
     int value = Field.UNDEFINED;
     if (this.selectedFxField != null) {
-      value = this.selectedFxField.getField().getValue();
+      Field field = this.selectedFxField.getField();
+      if (field.hasValue()) {
+        value = field.getValue();
+      } else {
+        value = field.getSingle();
+      }
+      if (value == Field.UNDEFINED) {
+        value = this.selectedValue;
+      } else {
+        this.selectedValue = value;
+      }
     }
     for (Node child : getChildren()) {
       if (child instanceof SudokuFxField fxField) {
-        if (child == this.selectedFxField) {
-          fxField.highlight(Field.UNDEFINED);
-        } else {
-          fxField.highlight(value);
-        }
+        fxField.highlight(value);
         fxField.update();
       }
     }

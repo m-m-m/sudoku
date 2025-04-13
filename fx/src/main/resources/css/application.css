@@ -19,7 +19,7 @@
   -fx-background-color: red !important;
 }
 .field.selected {
-	-fx-background-color: #FFA000;
+	-fx-background-color: #FFA000 !important;
 }
 .field.highlighted {
   -fx-background-color: #FFE000;

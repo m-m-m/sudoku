@@ -286,6 +286,41 @@ public class Field extends SudokuChildObject {
   }
 
   /**
+   * @return the number of candidates that have been {@link #excludeCandidate(int) excluded}.
+   */
+  public int getExcludedCandidateCount() {
+
+    return this.excludedCandidates.cardinality();
+  }
+
+  /**
+   * @return the number of candidates that are still included and have not been {@link #excludeCandidate(int) excluded}.
+   *         If this is {@code 1} then only a {@link #getSingle() single candidate} is left that is supposed to be the
+   *         correct {@link #getValue() value}.
+   */
+  public int getIncludedCandidateCount() {
+
+    return this.sudoku.getSize() - getExcludedCandidateCount();
+  }
+
+  /**
+   * @return the remaining single {@link #getIncludedCandidateCount() included candidate} or {@link #UNDEFINED -1} if
+   *         {@link #getIncludedCandidateCount()} is not equal to {@code 1}.
+   */
+  public int getSingle() {
+
+    if (getIncludedCandidateCount() == 1) {
+      int size = this.sudoku.getSize();
+      for (int i = 1; i <= size; i++) {
+        if (!this.excludedCandidates.get(i)) {
+          return i;
+        }
+      }
+    }
+    return UNDEFINED;
+  }
+
+  /**
    * @return the value or {@link #UNDEFINED -1} if not (yet) {@link #hasValue() defined}. Please note that the value is
    *         an internal representation that needs to be mapped to a {@link Sudoku#getSymbol(int) symbol} for
    *         presentation to the end-user. Typically the mapping is trivial and {@code 1} is mapped to "1" but this is
