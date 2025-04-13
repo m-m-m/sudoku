@@ -8,6 +8,7 @@ import io.github.mmm.sudoku.event.SudokuEvent;
 import io.github.mmm.sudoku.event.SudokuEventListener;
 import io.github.mmm.sudoku.event.SudokuEventSelectField;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 
 /**
  * Controller and view for a {@link Sudoku} puzzle.
@@ -18,7 +19,11 @@ public class SudokuFxPuzzle extends BorderPane implements SudokuFxView, SudokuEv
 
   private final SudokuFxBoard board;
 
+  private final SudokuFxHistoryButtons historyButtons;
+
   private final SudokuFxSymbolButtons mainButtons;
+
+  private final SudokuFxSymbolButtons candidateButtons;
 
   private SudokuFxField selectedFxField;
 
@@ -34,9 +39,16 @@ public class SudokuFxPuzzle extends BorderPane implements SudokuFxView, SudokuEv
     super();
     this.sudoku = sudoku;
     this.board = new SudokuFxBoard(this);
-    this.mainButtons = new SudokuFxSymbolButtons(this);
+    this.historyButtons = new SudokuFxHistoryButtons(this);
+    this.mainButtons = new SudokuFxSymbolButtons(this, false);
+    this.candidateButtons = new SudokuFxSymbolButtons(this, true);
     setCenter(this.board);
-    setRight(this.mainButtons);
+    VBox buttonBox = new VBox();
+    buttonBox.setSpacing(10);
+    buttonBox.getChildren().add(this.historyButtons);
+    buttonBox.getChildren().add(this.mainButtons);
+    buttonBox.getChildren().add(this.candidateButtons);
+    setRight(buttonBox);
     this.selectedValue = Field.UNDEFINED;
     sudoku.addListener(this);
   }
@@ -95,6 +107,11 @@ public class SudokuFxPuzzle extends BorderPane implements SudokuFxView, SudokuEv
     }
   }
 
+  private void selectField(Field field) {
+
+    selectField(this.board.getFxField(field));
+  }
+
   private void selectField(SudokuFxField fxField) {
 
     if (this.selectedFxField != null) {
@@ -127,6 +144,27 @@ public class SudokuFxPuzzle extends BorderPane implements SudokuFxView, SudokuEv
       return false;
     }
     this.sudoku.setFieldValue(field, value);
+    this.historyButtons.update();
+    return true;
+  }
+
+  /**
+   * @param candidate the {@link Field#getValue() value} {@link Field#hasCandidate(int) candidate} to toggle.
+   * @return {@code true} if the candidate has been successfully toggled, {@code false} otherwise (no field selected,
+   *         selected field {@link Field#hasValue() has value}, etc.).
+   * @see Field#toggleCandidate(int)
+   */
+  public boolean toggleCandidate(int candidate) {
+
+    if (this.selectedFxField == null) {
+      return false;
+    }
+    Field field = this.selectedFxField.getField();
+    if (field.hasValue()) {
+      return false;
+    }
+    this.sudoku.toggleCandidate(field, candidate);
+    this.historyButtons.update();
     return true;
   }
 
@@ -157,6 +195,49 @@ public class SudokuFxPuzzle extends BorderPane implements SudokuFxView, SudokuEv
 
     this.board.update();
     // this.mainButtons.update();
+  }
+
+  /**
+   * @param value the new value of {@link #getSelectedValue()}.
+   */
+  public void setSelectedValue(int value) {
+
+    if (this.selectedValue == value) {
+      return;
+    }
+    int size = this.sudoku.getSize();
+    Field valueField = null;
+    Field singleField = null;
+    Field candidateField = null;
+    for (int y = 1; y <= size; y++) {
+      for (int x = 1; x <= size; x++) {
+        Field field = this.sudoku.getField(x, y);
+        if (field.hasCandidate(value)) {
+          if (field.getValue() == value) {
+            if (valueField == null) {
+              valueField = field;
+            }
+          } else if (field.getSingle() == value) {
+            if (singleField == null) {
+              singleField = field;
+            }
+          } else {
+            if (candidateField == null) {
+              candidateField = field;
+            }
+          }
+        }
+      }
+    }
+    if (singleField != null) {
+      selectField(singleField);
+    } else if (valueField != null) {
+      selectField(valueField);
+    } else if (candidateField != null) {
+      selectField(candidateField);
+    } else {
+      this.selectedValue = value;
+    }
   }
 
 }

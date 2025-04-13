@@ -62,12 +62,6 @@ public class SudokuFxField extends Region implements SudokuFxView {
     update();
   }
 
-  @Override
-  public boolean isResizable() {
-
-    return true;
-  }
-
   private void onClick(MouseEvent e) {
 
     getSudoku().fireEvent(new SudokuEventSelectField(this.field));
@@ -104,32 +98,14 @@ public class SudokuFxField extends Region implements SudokuFxView {
 
     Sudoku sudoku = getSudoku();
     boolean hasValue = this.field.hasValue();
+    String label;
     if (hasValue) {
       int value = this.field.getValue();
-      this.text.setText(sudoku.getSymbol(value));
+      label = sudoku.getSymbol(value);
     } else {
-      int size = sudoku.getSize();
-      int base = sudoku.getBase();
-      int rowCount = 0;
-      StringBuilder sb = new StringBuilder(size * 2);
-      for (int i = 1; i <= size; i++) {
-        if (rowCount == base) {
-          sb.append('\n');
-          rowCount = 0;
-        } else {
-          if (i > 1) {
-            sb.append(' ');
-          }
-        }
-        rowCount++;
-        if (this.field.hasCandidate(i)) {
-          sb.append(sudoku.getSymbol(i));
-        } else {
-          sb.append(' ');
-        }
-      }
-      this.text.setText(sb.toString());
+      label = this.field.getCandidateMatrix();
     }
+    this.text.setText(label);
     updateStyle(STYLE_VALUE, hasValue);
     updateStyle(STYLE_CANDIDATES, !hasValue);
     updateError();

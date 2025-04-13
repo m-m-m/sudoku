@@ -5,6 +5,7 @@ package io.github.mmm.sudoku;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.IntPredicate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,6 +82,7 @@ public abstract class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuE
     this.dimension = dimension;
     this.partitionings = createPartitions();
     this.fields = createFields();
+    this.lastChange = new ChangeSet(Collections.emptyList(), null);
   }
 
   private List<Partitioning> createPartitions() {
@@ -184,13 +186,11 @@ public abstract class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuE
       return;
     }
 
-    field.setValue(value, given);
     ChangeSet changeSet = null;
     if (!given) {
-      // collect change events in ChangeSet for undo feature
-      this.currentChanges = new ArrayList<>();
-      changeSet = new ChangeSet(this.currentChanges, this.lastChange);
+      changeSet = startUndoHistory();
     }
+    field.setValue(value, given);
     if (value > 0) {
       for (Partitioning partitioning : this.partitionings) {
         int partitionIndex = field.getPartitionIndex(partitioning);
@@ -200,7 +200,6 @@ public abstract class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuE
             Field neighbour = partitioning.getPartitionField(partitionIndex, fieldIndex);
             if (neighbour != field) {
               if (neighbour.hasCandidate(value)) {
-                System.out.println(neighbour);
                 if (neighbour.hasValue()) {
                   field.setError(true);
                   neighbour.setError(true);
@@ -218,9 +217,32 @@ public abstract class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuE
       assert (this.currentChanges == null);
       assert (this.lastChange == null) : "Given clues should be set before actual values!";
     } else {
-      this.currentChanges = null; // end "transaction" to record changes
-      this.lastChange = changeSet; // append undo log
+      endUndoHistory(changeSet);
     }
+  }
+
+  /**
+   * @param field the {@link Field} to modify.
+   * @param candidate the {@link Field#hasCandidate(int) candidate} to {@link Field#toggleCandidate(int) toggle}.
+   */
+  public void toggleCandidate(Field field, int candidate) {
+
+    ChangeSet changeSet = startUndoHistory();
+    field.toggleCandidate(candidate);
+    endUndoHistory(changeSet);
+  }
+
+  private ChangeSet startUndoHistory() {
+
+    // collect change events in ChangeSet for undo feature
+    this.currentChanges = new ArrayList<>();
+    return new ChangeSet(this.currentChanges, this.lastChange);
+  }
+
+  private void endUndoHistory(ChangeSet changeSet) {
+
+    this.currentChanges = null; // end "transaction" to record changes
+    this.lastChange = changeSet;
   }
 
   /**
@@ -243,21 +265,32 @@ public abstract class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuE
     return valueCount;
   }
 
+  /**
+   * @return the last {@link ChangeSet}.
+   */
+  public ChangeSet getLastChange() {
+
+    return this.lastChange;
+  }
+
   @Override
   public void undo() {
 
-    if (this.lastChange != null) {
-      this.lastChange.undo();
-      this.lastChange = this.lastChange.getPrevious();
+    ChangeSet previous = this.lastChange.getPrevious();
+    if (previous != null) {
+      ChangeSet last = this.lastChange;
+      this.lastChange = previous;
+      last.undo();
     }
   }
 
   @Override
   public void redo() {
 
-    if ((this.lastChange != null) && (this.lastChange.getNext() != null)) {
-      this.lastChange.redo();
-      this.lastChange = this.lastChange.getNext();
+    ChangeSet next = this.lastChange.getNext();
+    if (next != null) {
+      this.lastChange = next;
+      next.redo();
     }
   }
 
@@ -296,6 +329,36 @@ public abstract class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuE
       this.currentChanges.add(changeEvent);
     }
     return super.fireEvent(event);
+  }
+
+  /**
+   * @param candidateFunction the custom {@link Field#hasCandidate(int) candidate function}.
+   * @return a {@link String} with the "matrix" of candidates.
+   * @see Field#getCandidateMatrix()
+   */
+  public String getCandidateMatrix(IntPredicate candidateFunction) {
+
+    int size = getSize();
+    int base = getBase();
+    int rowCount = 0;
+    StringBuilder sb = new StringBuilder(size * 2);
+    for (int i = 1; i <= size; i++) {
+      if (rowCount == base) {
+        sb.append('\n');
+        rowCount = 0;
+      } else {
+        if (i > 1) {
+          sb.append(' ');
+        }
+      }
+      rowCount++;
+      if (candidateFunction.test(i)) {
+        sb.append(getSymbol(i));
+      } else {
+        sb.append(' ');
+      }
+    }
+    return sb.toString();
   }
 
 }

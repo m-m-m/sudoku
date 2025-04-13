@@ -19,15 +19,21 @@ public class SudokuFxSymbolButtons extends GridPane implements SudokuContainer, 
 
   private final Sudoku sudoku;
 
+  private final boolean candidates;
+
   /**
    * The constructor.
    */
-  public SudokuFxSymbolButtons(SudokuFxPuzzle fxPuzzle) {
+  public SudokuFxSymbolButtons(SudokuFxPuzzle fxPuzzle, boolean candidates) {
 
     super();
     this.fxPuzzle = fxPuzzle;
     this.sudoku = fxPuzzle.getSudoku();
+    this.candidates = candidates;
     getStyleClass().add("symbols");
+    if (candidates) {
+      getStyleClass().add("candidates");
+    }
     initButtons();
   }
 
@@ -60,11 +66,23 @@ public class SudokuFxSymbolButtons extends GridPane implements SudokuContainer, 
 
   private Button createButton(int value) {
 
-    String symbol = this.sudoku.getSymbol(value);
+    String symbol;
+    if (this.candidates) {
+      symbol = this.sudoku.getCandidateMatrix(i -> i == value);
+    } else {
+      symbol = this.sudoku.getSymbol(value);
+    }
     Button button = new Button(symbol);
     button.setOnAction(e -> {
-      this.fxPuzzle.setValue(value);
+      if (this.candidates) {
+        this.fxPuzzle.toggleCandidate(value);
+      } else {
+        this.fxPuzzle.setValue(value);
+      }
     });
+    // button.focusedProperty().addListener(e -> {
+    // this.fxPuzzle.setSelectedValue(value);
+    // });
     return button;
   }
 

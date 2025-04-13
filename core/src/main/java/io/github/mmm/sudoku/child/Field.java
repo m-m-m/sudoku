@@ -283,31 +283,48 @@ public final class Field extends SudokuChildObject {
   /**
    * @param candidate the {@link #getValue() value} candidate to exclude in the range from {@code 1} to
    *        <code>{@link Sudoku#getSize()}</code>.
+   * @return {@code true} if something actually changed, {@code false} otherwise.
    */
-  public void excludeCandidate(int candidate) {
+  public boolean excludeCandidate(int candidate) {
 
     validateValue(candidate);
     if (this.excludedCandidates.get(candidate)) {
       LOG.trace("No change for excludeCandidate({}) in {}", candidate, this);
-      return;
+      return false;
     }
     this.excludedCandidates.set(candidate);
     fireEvent(new SudokuChangeEventExcludeCandidate(this, candidate));
+    return true;
   }
 
   /**
    * @param candidate the {@link #getValue() value} candidate to (re)include in the range from {@code 1} to
    *        <code>{@link Sudoku#getSize()}</code>.
+   * @return {@code true} if something actually changed, {@code false} otherwise.
    */
-  public void includeCandidate(int candidate) {
+  public boolean includeCandidate(int candidate) {
 
     validateValue(candidate);
     if (!this.excludedCandidates.get(candidate)) {
       LOG.trace("No change for includeCandidate({}) in {}", candidate, this);
-      return;
+      return false;
     }
     this.excludedCandidates.clear(candidate);
     fireEvent(new SudokuChangeEventIncludeCandidate(this, candidate));
+    return true;
+  }
+
+  /**
+   * @param candidate the {@link #getValue() value} candidate to toggle in the range from {@code 1} to
+   *        <code>{@link Sudoku#getSize()}</code>.
+   */
+  public void toggleCandidate(int candidate) {
+
+    if (hasCandidate(candidate)) {
+      excludeCandidate(candidate);
+    } else {
+      includeCandidate(candidate);
+    }
   }
 
   /**
@@ -370,11 +387,12 @@ public final class Field extends SudokuChildObject {
    * Low-level method to set the {@link #getValue() value}.
    *
    * @param value the new {@link #getValue() value}.
+   * @return {@code true} if something actually changed, {@code false} otherwise.
    * @see Sudoku#setFieldValue(Field, int)
    */
-  public void setValue(int value) {
+  public boolean setValue(int value) {
 
-    setValue(value, false);
+    return setValue(value, false);
   }
 
   /**
@@ -382,13 +400,14 @@ public final class Field extends SudokuChildObject {
    *
    * @param value the new {@link #getValue() value}.
    * @param given the {@link #isGiven() given flag}.
+   * @return {@code true} if something actually changed, {@code false} otherwise.
    * @see Sudoku#setFieldValue(Field, int, boolean)
    */
-  public void setValue(int value, boolean given) {
+  public boolean setValue(int value, boolean given) {
 
     if ((this.value == value) && (this.given == given)) {
       LOG.trace("No change for setValue in {}", this);
-      return;
+      return false;
     }
     validateValue(value, !given);
     int oldValue = this.value;
@@ -398,6 +417,7 @@ public final class Field extends SudokuChildObject {
       this.solution = value;
     }
     fireEvent(new SudokuChangeEventSetValue(this, oldValue, value));
+    return true;
   }
 
   /**
@@ -410,17 +430,19 @@ public final class Field extends SudokuChildObject {
 
   /**
    * @param solution the new {@link #getSolution() solution}.
+   * @return {@code true} if something actually changed, {@code false} otherwise.
    */
-  public void setSolution(int solution) {
+  public boolean setSolution(int solution) {
 
     if (this.solution == solution) {
       LOG.trace("No change for setSolution in {}", this);
-      return;
+      return false;
     }
     validateValue(solution, true);
     int oldSolution = this.solution;
     this.solution = solution;
     fireEvent(new SudokuChangeEventSetValue(this, oldSolution, solution));
+    return true;
   }
 
   private void validateValue(int v) {
@@ -466,15 +488,17 @@ public final class Field extends SudokuChildObject {
    * <b>ATTENTION:</b> Internal method that should not be invoked directly.
    *
    * @param error new value of {@link #isError()}.
+   * @return {@code true} if something actually changed, {@code false} otherwise.
    */
-  public void setError(boolean error) {
+  public boolean setError(boolean error) {
 
     if (this.error == error) {
       LOG.trace("No change for setError in {}", this);
-      return;
+      return false;
     }
     this.error = error;
     fireEvent(new SudokuChangeEventSetError(this));
+    return true;
   }
 
   @Override
@@ -508,4 +532,13 @@ public final class Field extends SudokuChildObject {
     }
     sb.append(']');
   }
+
+  /**
+   * @return a {@link String} with the "matrix" of {@link #hasCandidate(int) candidates}.
+   */
+  public String getCandidateMatrix() {
+
+    return this.sudoku.getCandidateMatrix(this::hasCandidate);
+  }
+
 }

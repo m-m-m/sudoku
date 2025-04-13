@@ -31,12 +31,6 @@ public class SudokuFxBoard extends GridPane implements SudokuFxView {
   }
 
   @Override
-  public boolean isResizable() {
-
-    return true;
-  }
-
-  @Override
   public Sudoku getSudoku() {
 
     return this.sudoku;
