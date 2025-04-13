@@ -12,7 +12,7 @@ import javafx.stage.Stage;
 /**
  * JavaFx GUI for {@link Sudoku} puzzle game.
  */
-public class SudokuFx extends Application {
+public class SudokuFx extends Application implements ValueCompletion {
 
   private SudokuFxBoard board;
 
@@ -32,7 +32,7 @@ public class SudokuFx extends Application {
   public void start(Stage primaryStage) throws Exception {
 
     this.sudoku = generateSudoku();
-    this.board = new SudokuFxBoard(this.sudoku);
+    this.board = new SudokuFxBoard(this);
     this.mainButtons = new SudokuFxSymbolButtons(this.board);
 
     BorderPane root = new BorderPane();
@@ -45,6 +45,14 @@ public class SudokuFx extends Application {
     primaryStage.show();
     primaryStage.setMinHeight(primaryStage.getHeight());
     primaryStage.setMinWidth(primaryStage.getWidth());
+  }
+
+  /**
+   * @return the {@link Sudoku}.
+   */
+  public Sudoku getSudoku() {
+
+    return this.sudoku;
   }
 
   private static Sudoku generateSudoku() {
@@ -72,6 +80,12 @@ public class SudokuFx extends Application {
     sudoku.setFieldGivenValue(6, 9, 8);
     sudoku.setFieldGivenValue(8, 9, 9);
     return sudoku;
+  }
+
+  @Override
+  public void onValueCompletion(int value, boolean completed) {
+
+    this.mainButtons.onValueCompletion(value, completed);
   }
 
 }

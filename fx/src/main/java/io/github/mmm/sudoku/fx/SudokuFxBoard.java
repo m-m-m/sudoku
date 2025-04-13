@@ -12,6 +12,8 @@ import javafx.scene.layout.GridPane;
  */
 public class SudokuFxBoard extends GridPane implements SudokuFxView {
 
+  private final SudokuFx fxSudoku;
+
   private final Sudoku sudoku;
 
   private SudokuFxField selectedFxField;
@@ -23,11 +25,12 @@ public class SudokuFxBoard extends GridPane implements SudokuFxView {
    *
    * @param sudoku the {@link Sudoku} presented by this view.
    */
-  public SudokuFxBoard(Sudoku sudoku) {
+  public SudokuFxBoard(SudokuFx fxSudoku) {
 
     super();
+    this.fxSudoku = fxSudoku;
+    this.sudoku = fxSudoku.getSudoku();
     getStyleClass().add("board");
-    this.sudoku = sudoku;
     initBoard();
     this.selectedValue = Field.UNDEFINED;
   }
@@ -90,6 +93,11 @@ public class SudokuFxBoard extends GridPane implements SudokuFxView {
       return false;
     }
     this.sudoku.setFieldValue(field, value);
+    int valueCount = this.sudoku.getValueCount(value);
+    if (valueCount == this.sudoku.getSize()) {
+      this.fxSudoku.onValueCompletion(value, true);
+      // this.buttons.disable();
+    }
     update();
     return true;
   }

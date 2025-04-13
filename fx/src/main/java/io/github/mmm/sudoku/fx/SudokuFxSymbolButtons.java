@@ -13,7 +13,7 @@ import javafx.scene.layout.GridPane;
  * {@link Sudoku#setFieldValue(io.github.mmm.sudoku.child.Field, int) set field values} in the currently selected
  * {@link Field}.
  */
-public class SudokuFxSymbolButtons extends GridPane implements SudokuContainer {
+public class SudokuFxSymbolButtons extends GridPane implements SudokuContainer, ValueCompletion {
 
   private final SudokuFxBoard board;
 
@@ -66,6 +66,13 @@ public class SudokuFxSymbolButtons extends GridPane implements SudokuContainer {
       this.board.setValue(value);
     });
     return button;
+  }
+
+  @Override
+  public void onValueCompletion(int value, boolean completed) {
+
+    Button button = (Button) getChildren().get(value - 1);
+    button.setDisable(completed);
   }
 
 }

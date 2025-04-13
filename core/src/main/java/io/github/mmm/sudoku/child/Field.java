@@ -321,8 +321,10 @@ public class Field extends SudokuChildObject {
   }
 
   /**
-   * @return the value or {@link #UNDEFINED -1} if not (yet) {@link #hasValue() defined}. Please note that the value is
-   *         an internal representation that needs to be mapped to a {@link Sudoku#getSymbol(int) symbol} for
+   * @return the value or {@link #UNDEFINED -1} if not (yet) {@link #hasValue() defined}. A defined value is in the
+   *         range from {@code 1} to {@link Sudoku#getSize() sudoku size}. It is either a {@link #isGiven() given clue}
+   *         or has been {@link #setValue(int) filled} in the process to solve the {@link Sudoku}. Please note that the
+   *         value is an internal representation that needs to be mapped to a {@link Sudoku#getSymbol(int) symbol} for
    *         presentation to the end-user. Typically the mapping is trivial and {@code 1} is mapped to "1" but this is
    *         configured and symbols could also be emojis or whatever.
    */
@@ -362,7 +364,8 @@ public class Field extends SudokuChildObject {
     validateValue(value, !given);
     this.value = value;
     if (given) {
-      this.given = given;
+      this.given = true;
+      this.solution = value;
     }
   }
 
@@ -435,7 +438,32 @@ public class Field extends SudokuChildObject {
   @Override
   public String toString() {
 
-    return "Field " + getX() + "x" + getY() + " value=" + this.value + " excluded=" + this.excludedCandidates
-        + " solution=" + this.solution + " error=" + this.error;
+    StringBuilder sb = new StringBuilder(96);
+    sb.append("Field ");
+    sb.append(getX());
+    sb.append('x');
+    sb.append(getY());
+    sb.append(" value=");
+    appendValue(this.value, sb);
+    sb.append(" solution=");
+    appendValue(this.solution, sb);
+    sb.append(" excluded=");
+    sb.append(this.excludedCandidates);
+    if (this.error) {
+      sb.append(" error!");
+    }
+    return sb.toString();
+  }
+
+  private void appendValue(int v, StringBuilder sb) {
+
+    sb.append(v);
+    sb.append('[');
+    if (v == UNDEFINED) {
+      sb.append('?');
+    } else {
+      sb.append(this.sudoku.getSymbol(v));
+    }
+    sb.append(']');
   }
 }

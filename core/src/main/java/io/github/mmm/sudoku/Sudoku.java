@@ -137,6 +137,19 @@ public abstract class Sudoku implements Dimension, ChangeAware {
   }
 
   /**
+   * Convenience method for {@link #setFieldValue(Field, int, boolean)} to set a {@link Field#isGiven() given}
+   * {@link Field#getValue() value}.
+   *
+   * @param x the column number starting from {@code 1}.
+   * @param y the row number starting from {@code 1}.
+   * @param value the given value starting from {@code 1}.
+   */
+  public void setFieldGivenValue(int x, int y, int value) {
+
+    setFieldValue(getField(x, y), value, true);
+  }
+
+  /**
    * Smart variant of {@link Field#setValue(int)} that also updates candidates.
    *
    * @param field the {@link Field} to update.
@@ -206,16 +219,23 @@ public abstract class Sudoku implements Dimension, ChangeAware {
   }
 
   /**
-   * Convenience method for {@link #setFieldValue(Field, int, boolean)} to set a {@link Field#isGiven() given}
-   * {@link Field#getValue() value}.
-   *
-   * @param x the column number starting from {@code 1}.
-   * @param y the row number starting from {@code 1}.
-   * @param value the given value starting from {@code 1}.
+   * @param value the {@link Field#getValue() value} to count.
+   * @return the number of {@link Field}s that {@link Field#getValue() have} the given {@code value}. In case this is
+   *         equal to the {@link Sudoku#getSize() sudoku size} the value is completed.
    */
-  public void setFieldGivenValue(int x, int y, int value) {
+  public int getValueCount(int value) {
 
-    setFieldValue(getField(x, y), value, true);
+    int size = getSize();
+    int valueCount = 0;
+    for (int x = 1; x <= size; x++) {
+      for (int y = 1; y <= size; y++) {
+        Field field = getField(x, y);
+        if (field.getValue() == value) {
+          valueCount++;
+        }
+      }
+    }
+    return valueCount;
   }
 
   @Override
