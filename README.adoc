@@ -21,11 +21,14 @@ The great thing about this design is that implementations like solvers or genera
 This library offers the following features:
 
 * Powerful but easy model for Sudoku and its variants
+* Support for all common kinds of Sudoku variants
+* Ability to add and implement your own variant in minutes
 * History with unlimited undo/redo
 * Support and auto-generation for candidates (pencil marks)
 * Automatic error detection
 * Generation of hints and solutions
 * Validation of the Sudoku
+* Eventing to observe changes and other aspects
 
 == Usage
 
