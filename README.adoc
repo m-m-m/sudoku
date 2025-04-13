@@ -9,9 +9,9 @@ image:https://img.shields.io/maven-central/v/io.github.m-m-m/mmm-sudoku.svg?labe
 image:https://javadoc.io/badge2/io.github.m-m-m/mmm-sudoku/javadoc.svg["sudoku JavaDoc", link=https://javadoc.io/doc/io.github.m-m-m/mmm-sudoku]
 
 The module `io.github.mmm.sudoku` (artifactId `mmm-sudoku`) provides a flexible model and engine for Sudoku puzzles.
-Instead of hard-coding specific types of Sudokus we designed the Sudoku to have any number of `Partitioning`s.
+Instead of hard-coding specific types of Sudokus we designed the Sudoku to have any number of `Partitionings`.
 Each `Partitioning` can divide the Sudoku board entirely or partially into any number of partitions.
-Every Sudoku always has `Column` and `Row` as `Partitioning`. Most of them also have `Box` but a Jigsaw Sudoku (Squiggly Sudoku) has `Region`s that are typically non-rectangular. The latter even allows irregular `Dimension`s such as a 5x5 board.
+Every Sudoku always has `Column` and `Row` as `Partitioning`. Most of them also have `Box` but a Jigsaw Sudoku (Squiggly Sudoku) has `Regions` that are typically non-rectangular. The latter even allows an irregular `Dimension` such as a 5x5 board.
 Even Killer Sudoku (SumDoku) is possible with this model.
 
 The great thing about this design is that implementations like solvers or generators as well as the UI presenting the game can stay generic and need little to no knowledge of the different kind of Sudokus (except for SumDokus that add a whole new concept to the game).
