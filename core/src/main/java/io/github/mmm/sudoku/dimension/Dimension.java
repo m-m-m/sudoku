@@ -2,17 +2,16 @@
  * http://www.apache.org/licenses/LICENSE-2.0 */
 package io.github.mmm.sudoku.dimension;
 
-import io.github.mmm.sudoku.JigsawSudoku;
 import io.github.mmm.sudoku.Sudoku;
-import io.github.mmm.sudoku.child.Box;
-import io.github.mmm.sudoku.child.Column;
-import io.github.mmm.sudoku.child.Region;
-import io.github.mmm.sudoku.child.Row;
+import io.github.mmm.sudoku.common.AttributeRegular;
+import io.github.mmm.sudoku.partitioning.Column;
+import io.github.mmm.sudoku.partitioning.Region;
+import io.github.mmm.sudoku.partitioning.Row;
 
 /**
  * Interface for the dimension of a {@link Sudoku}.
  */
-public interface Dimension {
+public interface Dimension extends AttributeRegular {
 
   /**
    * @return the size of this {@link Sudoku} as its width and height. So the size represents the number of
@@ -26,15 +25,6 @@ public interface Dimension {
    *         {@link #getSymbol(int) symbols} from 0 to F.
    */
   int getSize();
-
-  /**
-   * @return {@code true} if the {@link #getSize() size} is quadratic ({@link #getBase() base} * {@link #getBase() base}
-   *         == {@link #getSize() size}), {@code false} otherwise. E.g. a {@link JigsawSudoku} can have an irregular
-   *         {@link Dimension} such as a {@link #getSize() size} of {@code 5}). A regular {@link Sudoku} has
-   *         {@link Box}es using the {@link #getBase() base} as width and height and therefore must have a regular
-   *         {@link Dimension}.
-   */
-  boolean isRegular();
 
   /**
    * @return the base of the {@link Sudoku} as the square-root of its {@link #getSize() size}. This is only exact for a

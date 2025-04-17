@@ -3,7 +3,7 @@
 package io.github.mmm.sudoku.fx;
 
 import io.github.mmm.sudoku.Sudoku;
-import io.github.mmm.sudoku.child.Field;
+import io.github.mmm.sudoku.field.Field;
 import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
 

@@ -2,7 +2,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0 */
 package io.github.mmm.sudoku.event;
 
-import io.github.mmm.sudoku.child.Field;
+import io.github.mmm.sudoku.field.Field;
 
 /**
  * {@link SudokuChangeEvent} for {@link Field#setError(boolean) setError}(true).

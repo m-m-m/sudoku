@@ -4,18 +4,16 @@ package io.github.mmm.sudoku;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.IntPredicate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.github.mmm.base.collection.ArrayIterator;
 import io.github.mmm.event.AbstractEventSender;
-import io.github.mmm.sudoku.child.Box;
-import io.github.mmm.sudoku.child.Column;
-import io.github.mmm.sudoku.child.Field;
-import io.github.mmm.sudoku.child.Partitioning;
-import io.github.mmm.sudoku.child.Row;
+import io.github.mmm.sudoku.builder.SudokuBuilder;
 import io.github.mmm.sudoku.dimension.AbstractDimension;
 import io.github.mmm.sudoku.dimension.Dimension;
 import io.github.mmm.sudoku.dimension.RegularDimension;
@@ -23,7 +21,16 @@ import io.github.mmm.sudoku.event.ChangeAware;
 import io.github.mmm.sudoku.event.SudokuChangeEvent;
 import io.github.mmm.sudoku.event.SudokuEvent;
 import io.github.mmm.sudoku.event.SudokuEventListener;
+import io.github.mmm.sudoku.field.Field;
 import io.github.mmm.sudoku.history.ChangeSet;
+import io.github.mmm.sudoku.partition.Partition;
+import io.github.mmm.sudoku.partitioning.Box;
+import io.github.mmm.sudoku.partitioning.Column;
+import io.github.mmm.sudoku.partitioning.FlexiblePartitioning.PartitioningFactory;
+import io.github.mmm.sudoku.partitioning.FlexiblePartitioning.RegionFactory;
+import io.github.mmm.sudoku.partitioning.Partitioning;
+import io.github.mmm.sudoku.partitioning.Row;
+import io.github.mmm.sudoku.partitioning.Sum;
 
 /**
  * Represents a Sudoku puzzle.<br>
@@ -40,15 +47,15 @@ import io.github.mmm.sudoku.history.ChangeSet;
  *     if (value != -1) {
  *       // field already filled/solved
  *       String valueSymbol = sudoku.{@link #getSymbol(int) getSymbol}(value);
- *       // e.g. value=9 and valueSymbol="9" or value=16 and valueSymbol="F"
+ *       // e.g. value=9 and valueSymbol="9" (or value=16 and valueSymbol="F")
  *       System.out.println("Value at " + x + "x" + y + " is " + valueSymbol);
  *     }
  *   }
  * }
  * </pre>
  */
-public abstract class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListener>
-    implements Dimension, ChangeAware {
+public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListener>
+    implements Dimension, ChangeAware, Iterable<Partitioning> {
 
   private static final Logger LOG = LoggerFactory.getLogger(Sudoku.class);
 
@@ -57,7 +64,9 @@ public abstract class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuE
 
   private final Field[][] fields;
 
-  private final List<Partitioning> partitionings;
+  private final Partitioning[] partitionings;
+
+  private final String type;
 
   private ChangeSet lastChange;
 
@@ -68,38 +77,66 @@ public abstract class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuE
    */
   public Sudoku() {
 
-    this(RegularDimension.NORMAL);
+    this(RegularDimension.NORMAL, Box.FACTORY);
   }
 
   /**
    * The constructor.
    *
    * @param dimension the {@link AbstractDimension}.
+   * @param factory the {@link RegionFactory}.
+   * @param factories the {@link PartitioningFactory} instances.
    */
-  public Sudoku(AbstractDimension dimension) {
+  public Sudoku(AbstractDimension dimension, RegionFactory factory, PartitioningFactory... factories) {
 
     super();
     this.dimension = dimension;
-    this.partitionings = createPartitions();
     this.fields = createFields();
+    this.partitionings = new Partitioning[factories.length + 3];
+    int i = 0;
+    this.partitionings[i++] = new Column(this);
+    this.partitionings[i++] = new Row(this);
+    this.partitionings[i++] = factory.create(this, i);
+    for (PartitioningFactory pFactory : factories) {
+      this.partitionings[i++] = pFactory.create(this, i);
+    }
     this.lastChange = new ChangeSet(Collections.emptyList(), null);
+    this.type = computeType();
   }
 
-  private List<Partitioning> createPartitions() {
+  private String computeType() {
 
-    List<Partitioning> mutablePartitionings = new ArrayList<>();
-    registerPartitions(mutablePartitionings);
-    return Collections.unmodifiableList(mutablePartitionings);
+    String puzzle = "Sudoku";
+    Partitioning region = this.partitionings[2];
+    String typeName = "";
+    if (!(region instanceof Box)) {
+      typeName = region.getName();
+    }
+    String previous = "";
+    for (int i = 3; i < this.partitionings.length; i++) {
+      Partitioning p = this.partitionings[i];
+      if (p instanceof Sum) {
+        puzzle = "Sumdoku";
+      } else {
+        String name = p.getName();
+        if (!name.equals(previous)) {
+          typeName = compose(typeName, name);
+          previous = name;
+        }
+      }
+    }
+    return compose(typeName, puzzle);
   }
 
-  /**
-   * @param p the {@link List} where to register the {@link Partitioning}s.
-   */
-  protected void registerPartitions(List<Partitioning> p) {
+  private static String compose(String s1, String s2) {
 
-    p.add(new Column(this));
-    p.add(new Row(this));
-    p.add(new Box(this));
+    if (s1.isEmpty()) {
+      return s2;
+    } else if (s2.isEmpty()) {
+      return s1;
+    } else {
+      return s1 + "-" + s2;
+    }
   }
 
   @Override
@@ -121,9 +158,12 @@ public abstract class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuE
   }
 
   /**
-   * @return the type of this {@link Sudoku} (e.g. "Standard" for {@link StandardSudoku} or "Hyper").
+   * @return the type of this {@link Sudoku} (e.g. just "Sudoku" or "Jigsaw-Hyper-SumDoku").
    */
-  public abstract String getType();
+  public String getType() {
+
+    return this.type;
+  }
 
   /**
    * @param i the index of the requested symbol in the range from {@code 0} to <code>{@link #getSize()}-1</code>.
@@ -181,7 +221,6 @@ public abstract class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuE
    */
   public void setFieldValue(Field field, int value, boolean given, boolean withHistory) {
 
-    int size = getSize();
     int oldValue = field.getValue();
     if (oldValue == value) {
       return;
@@ -194,19 +233,16 @@ public abstract class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuE
     field.setValue(value, given);
     if (value > 0) {
       for (Partitioning partitioning : this.partitionings) {
-        int partitionIndex = field.getPartitionIndex(partitioning);
-        if (partitionIndex >= 0) {
-          LOG.debug("Updating partition {} of {}", partitionIndex, partitioning.getName());
-          for (int fieldIndex = 1; fieldIndex <= size; fieldIndex++) {
-            Field neighbour = partitioning.getPartitionField(partitionIndex, fieldIndex);
-            if (neighbour != field) {
-              if (neighbour.hasCandidate(value)) {
-                if (neighbour.hasValue()) {
-                  field.setError(true);
-                  neighbour.setError(true);
-                } else {
-                  neighbour.excludeCandidate(value);
-                }
+        Partition partition = field.getPartition(partitioning);
+        if (partition != null) {
+          LOG.debug("Updating partition {} of {}", partition.getIndex(), partitioning.getName());
+          for (Field neighbour : partition) {
+            if ((neighbour != field) && neighbour.hasCandidate(value)) {
+              if (neighbour.hasValue()) {
+                field.setError(true);
+                neighbour.setError(true);
+              } else {
+                neighbour.excludeCandidate(value);
               }
             }
           }
@@ -298,12 +334,31 @@ public abstract class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuE
   }
 
   /**
-   * @return the {@link List} of {@link Partitioning}s used by this Sudoku. Regular Sudokus always use the
-   *         {@link Partitioning}s {@link Column}, {@link Row}, and {@link Box}.
+   * @return the number of {@link Partitioning}s of this {@link Sudoku}. Will be {@code 3} for a classic {@link Sudoku}
+   *         that has {@link Column}s, {@link Row}s, and {@link Box}es.
    */
-  public final List<Partitioning> getPartitionings() {
+  public final int getPartitioningCount() {
 
-    return this.partitionings;
+    return this.partitionings.length;
+  }
+
+  /**
+   * @param i the index of the requested {@link Partitioning} in the range from {@code 1} to
+   *        <code>{@link #getPartitioningCount()}</code>.
+   * @return the requested {@link Partitioning}.
+   */
+  public final Partitioning getPartitioning(int i) {
+
+    if ((i < 1) || (i > this.partitionings.length)) {
+      throw new IndexOutOfBoundsException(i);
+    }
+    return this.partitionings[i - 1];
+  }
+
+  @Override
+  public Iterator<Partitioning> iterator() {
+
+    return new ArrayIterator<>(this.partitionings);
   }
 
   private Field[][] createFields() {
@@ -362,6 +417,14 @@ public abstract class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuE
       }
     }
     return sb.toString();
+  }
+
+  /**
+   * @return the {@link SudokuBuilder} to build a {@link Sudoku} with fluent API.
+   */
+  public static SudokuBuilder builder() {
+
+    return SudokuBuilder.get();
   }
 
 }

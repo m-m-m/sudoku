@@ -1,12 +1,12 @@
 package io.github.mmm.sudoku.fx;
 
 import io.github.mmm.sudoku.Sudoku;
-import io.github.mmm.sudoku.child.Field;
 import io.github.mmm.sudoku.event.SudokuChangeEvent;
 import io.github.mmm.sudoku.event.SudokuChangeEventSetValue;
 import io.github.mmm.sudoku.event.SudokuEvent;
 import io.github.mmm.sudoku.event.SudokuEventListener;
 import io.github.mmm.sudoku.event.SudokuEventSelectField;
+import io.github.mmm.sudoku.field.Field;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 

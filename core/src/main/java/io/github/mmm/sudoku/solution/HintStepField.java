@@ -1,6 +1,6 @@
 package io.github.mmm.sudoku.solution;
 
-import io.github.mmm.sudoku.child.Field;
+import io.github.mmm.sudoku.field.Field;
 
 /**
  * {@link HintStep} applying to a specific {@link Field}.

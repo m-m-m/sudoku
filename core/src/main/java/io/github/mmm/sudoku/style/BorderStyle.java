@@ -3,8 +3,8 @@
 package io.github.mmm.sudoku.style;
 
 /**
- * Type to represent a style to mark borders of a {@link io.github.mmm.sudoku.child.Field} as thick. Used to mark the
- * outline of a {@link io.github.mmm.sudoku.child.Region}.
+ * Type to represent a style to mark borders of a {@link io.github.mmm.sudoku.field.Field} as thick. Used to mark the
+ * outline of a {@link io.github.mmm.sudoku.partitioning.Region}.
  */
 public final class BorderStyle extends Style {
 

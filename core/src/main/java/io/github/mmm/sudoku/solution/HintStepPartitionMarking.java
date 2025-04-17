@@ -1,7 +1,7 @@
 package io.github.mmm.sudoku.solution;
 
-import io.github.mmm.sudoku.child.Field;
-import io.github.mmm.sudoku.child.Partitioning;
+import io.github.mmm.sudoku.field.Field;
+import io.github.mmm.sudoku.partition.Partition;
 
 /**
  * {@link HintStepPartition} to mark a specific partition to visualise a {@link Hint}.
@@ -12,20 +12,17 @@ public class HintStepPartitionMarking extends HintStepPartition {
    * The constructor.
    *
    * @param message the {@link #getMessage() message}.
-   * @param partitioning the {@link #getPartitioning() partitioning}.
-   * @param partitionIndex the {@link #getPartitionIndex() partition index}.
+   * @param partition the {@link #getPartition() partition}.
    */
-  public HintStepPartitionMarking(String message, Partitioning partitioning, int partitionIndex) {
+  public HintStepPartitionMarking(String message, Partition partition) {
 
-    super(message, partitioning, partitionIndex);
+    super(message, partition);
   }
 
   @Override
   public void prepare() {
 
-    int size = this.partitioning.getSudoku().getSize();
-    for (int fieldIndex = 1; fieldIndex <= size; fieldIndex++) {
-      Field field = this.partitioning.getPartitionField(this.partitionIndex, fieldIndex);
+    for (Field field : this.partition) {
       field.setMarked(true);
     }
   }

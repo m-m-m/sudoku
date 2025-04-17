@@ -3,8 +3,8 @@
 package io.github.mmm.sudoku.fx;
 
 import io.github.mmm.sudoku.Sudoku;
-import io.github.mmm.sudoku.child.Field;
 import io.github.mmm.sudoku.event.SudokuEventSelectField;
+import io.github.mmm.sudoku.field.Field;
 import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
 import javafx.scene.control.Label;

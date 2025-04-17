@@ -2,13 +2,19 @@
  * http://www.apache.org/licenses/LICENSE-2.0 */
 package io.github.mmm.sudoku.style;
 
-import io.github.mmm.sudoku.child.Partitioning;
+import io.github.mmm.sudoku.Sudoku;
+import io.github.mmm.sudoku.field.Field;
+import io.github.mmm.sudoku.partition.Partition;
+import io.github.mmm.sudoku.partitioning.Hyper;
+import io.github.mmm.sudoku.partitioning.Partitioning;
+import io.github.mmm.sudoku.partitioning.Percent;
+import io.github.mmm.sudoku.partitioning.X2;
 
 /**
- * {@link Enum} with the available types for the {@link ColorType} of the {@link io.github.mmm.sudoku.child.Field}s of a
- * {@link io.github.mmm.sudoku.child.Partitioning#getPartitionCount() partition}.
+ * {@link Enum} with the available types for the {@link ColorType} of the {@link io.github.mmm.sudoku.field.Field}s of a
+ * {@link io.github.mmm.sudoku.partitioning.Partitioning#getPartitionCount() partition}.
  *
- * @see io.github.mmm.sudoku.child.Partitioning#getColorType()
+ * @see io.github.mmm.sudoku.partitioning.Partitioning#getColorType()
  */
 public enum ColorType {
 
@@ -28,18 +34,33 @@ public enum ColorType {
   },
 
   /**
-   * Single color meaning that all {@link io.github.mmm.sudoku.child.Partitioning#getPartitionCount() partitions} of a
-   * {@link io.github.mmm.sudoku.child.Partitioning} have the same color. This makes sense for distinct
-   * {@link io.github.mmm.sudoku.child.Partitioning#getPartitionCount() partitions} that do not "touch" each other so
-   * {@link io.github.mmm.sudoku.child.Field} neighbours never belong to different
-   * {@link io.github.mmm.sudoku.child.Partitioning#getPartitionCount() partitions}. Examples are
-   * {@link io.github.mmm.sudoku.Sudoku#getType() Sudoku types} like Hyper or Percent.
+   * Single color meaning that all {@link Partition}s of a {@link Partitioning} have the same color. This makes sense
+   * for distinct {@link Partitioning#getPartitionCount() partitions} that do not "touch" each other so {@link Field}
+   * neighbours never belong to different {@link Partitioning#getPartitionCount() partitions}. Examples are
+   * {@link Sudoku#getType() Sudoku types} like {@link Hyper} or {@link Percent}.
    */
   SINGLE {
     @Override
     public int getOffset(Partitioning partitioning) {
 
       return 1;
+    }
+
+    @Override
+    public int getColor(int offset, int partitionIndex, Partitioning partitioning) {
+
+      return offset + 1;
+    }
+  },
+
+  /**
+   * Same color as the last {@link Partition}. E.g. for {@link X2}.
+   */
+  SAME {
+    @Override
+    public int getOffset(Partitioning partitioning) {
+
+      return 0;
     }
 
     @Override

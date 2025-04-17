@@ -1,6 +1,6 @@
 /* Copyright (c) The m-m-m Team, Licensed under the Apache License, Version 2.0
  * http://www.apache.org/licenses/LICENSE-2.0 */
-package io.github.mmm.sudoku.child;
+package io.github.mmm.sudoku.partitioning;
 
 import io.github.mmm.sudoku.Sudoku;
 
@@ -16,24 +16,12 @@ public class Column extends Partitioning {
    */
   public Column(Sudoku sudoku) {
 
-    super(sudoku);
+    super(sudoku, 1, (s, pi, fi) -> s.getField(pi, fi));
   }
 
   @Override
-  public int getId() {
+  public boolean isRegular() {
 
-    return 0;
-  }
-
-  @Override
-  public String getName() {
-
-    return "Column";
-  }
-
-  @Override
-  public Field getPartitionField(int partitionIndex, int fieldIndex) {
-
-    return this.sudoku.getField(partitionIndex, fieldIndex);
+    return false;
   }
 }

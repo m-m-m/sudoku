@@ -3,6 +3,8 @@
 package io.github.mmm.sudoku.child;
 
 import io.github.mmm.sudoku.Sudoku;
+import io.github.mmm.sudoku.field.Field;
+import io.github.mmm.sudoku.partitioning.Partitioning;
 
 /**
  * Abstract base class for children of a {@link Sudoku} like {@link Field} or {@link Partitioning}.

@@ -1,9 +1,8 @@
 /* Copyright (c) The m-m-m Team, Licensed under the Apache License, Version 2.0
  * http://www.apache.org/licenses/LICENSE-2.0 */
-package io.github.mmm.sudoku.child;
+package io.github.mmm.sudoku.field;
 
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -12,12 +11,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.github.mmm.sudoku.Sudoku;
-import io.github.mmm.sudoku.event.SudokuChangeEventExcludeCandidate;
-import io.github.mmm.sudoku.event.SudokuChangeEventIncludeCandidate;
+import io.github.mmm.sudoku.child.SudokuChildObject;
+import io.github.mmm.sudoku.common.Candidates;
+import io.github.mmm.sudoku.event.SudokuChangeEventCandidates;
 import io.github.mmm.sudoku.event.SudokuChangeEventSetError;
 import io.github.mmm.sudoku.event.SudokuChangeEventSetMarked;
 import io.github.mmm.sudoku.event.SudokuChangeEventSetValue;
 import io.github.mmm.sudoku.event.SudokuEvent;
+import io.github.mmm.sudoku.partition.Partition;
+import io.github.mmm.sudoku.partitioning.Partitioning;
 import io.github.mmm.sudoku.style.BorderStyle;
 import io.github.mmm.sudoku.style.BorderType;
 import io.github.mmm.sudoku.style.ColorType;
@@ -33,7 +35,11 @@ public final class Field extends SudokuChildObject {
   /** {@link #getValue() Value} if undefined. */
   public static final int UNDEFINED = -1;
 
-  private final int[] partitionIndexes;
+  private final int x;
+
+  private final int y;
+
+  private Partition[] partitions;
 
   private boolean given;
 
@@ -43,7 +49,7 @@ public final class Field extends SudokuChildObject {
 
   private int solution;
 
-  private final BitSet excludedCandidates;
+  private Candidates candidates;
 
   private boolean error;
 
@@ -59,12 +65,11 @@ public final class Field extends SudokuChildObject {
   public Field(Sudoku sudoku, int x, int y) {
 
     super(sudoku);
-    this.partitionIndexes = new int[sudoku.getPartitionings().size()];
-    this.partitionIndexes[0] = x;
-    this.partitionIndexes[1] = y;
+    this.x = x;
+    this.y = y;
     this.value = UNDEFINED;
     this.solution = UNDEFINED;
-    this.excludedCandidates = new BitSet();
+    this.candidates = Candidates.ofAll();
   }
 
   private boolean fireEvent(SudokuEvent<?> event) {
@@ -74,42 +79,46 @@ public final class Field extends SudokuChildObject {
 
   /**
    * @param partitioning the {@link Partitioning}.
+   * @return the the {@link Partition} of the given {@link Partitioning} containing this {@link Field} or {@code null}
+   *         if no such {@link Partition} exists (e.g. special {@link Partitioning}s like Hyper, X, Percent, etc. do not
+   *         cover all fields).
+   */
+  public Partition getPartition(Partitioning partitioning) {
+
+    if (this.partitions == null) {
+      initPartitions();
+    }
+    return this.partitions[partitioning.getIndex() - 1];
+  }
+
+  /**
+   * @param partitioning the {@link Partitioning}.
    * @return the {@code partitionIndex} of this {@link Field} in the given {@link Partitioning} so it can be found via
    *         {@link Partitioning#getPartitionField(int, int)}. May be {@code -1} if this {@link Field} is not included
    *         in the given {@link Partitioning} (e.g. for Hyper, Percent, or X).
+   * @deprecated use {@link #getPartition(Partitioning)} instead.
    */
+  @Deprecated
   public int getPartitionIndex(Partitioning partitioning) {
 
-    int id = partitioning.getId();
-    if (this.partitionIndexes[id] == 0) {
-      initPartitionIndexes();
+    Partition partition = getPartition(partitioning);
+    if (partition == null) {
+      return UNDEFINED;
     }
-    return this.partitionIndexes[id];
+    return partition.getIndex();
   }
 
-  private void initPartitionIndexes() {
+  private void initPartitions() {
 
-    int size = this.sudoku.getSize();
-    for (Partitioning partitioning : this.sudoku.getPartitionings()) {
-      int id = partitioning.getId();
-      if (id > 1) {
-        int partitionCount = partitioning.getPartitionCount();
-        for (int partitionIndex = 1; partitionIndex <= partitionCount; partitionIndex++) {
-          for (int fieldIndex = 1; fieldIndex <= size; fieldIndex++) {
-            Field field = partitioning.getPartitionField(partitionIndex, fieldIndex);
-            assert (field.partitionIndexes[id] == 0);
-            field.partitionIndexes[id] = partitionIndex;
+    int partitioningCount = this.sudoku.getPartitioningCount();
+    for (Partitioning partitioning : this.sudoku) {
+      int partitioningIndex = partitioning.getIndex();
+      for (Partition partition : partitioning) {
+        for (Field field : partition) {
+          if (field.partitions == null) {
+            field.partitions = new Partition[partitioningCount];
           }
-        }
-      }
-    }
-    for (int x = 1; x <= size; x++) {
-      for (int y = 1; y <= size; y++) {
-        Field field = this.sudoku.getField(x, y);
-        for (int i = 2; i < field.partitionIndexes.length; i++) {
-          if (field.partitionIndexes[i] == 0) {
-            field.partitionIndexes[i] = UNDEFINED; // field not reachable within this partitioning
-          }
+          field.partitions[partitioningIndex - 1] = partition;
         }
       }
     }
@@ -120,7 +129,7 @@ public final class Field extends SudokuChildObject {
    */
   public int getX() {
 
-    return this.partitionIndexes[0];
+    return this.x;
   }
 
   /**
@@ -128,7 +137,7 @@ public final class Field extends SudokuChildObject {
    */
   public int getY() {
 
-    return this.partitionIndexes[1];
+    return this.y;
   }
 
   /**
@@ -145,10 +154,9 @@ public final class Field extends SudokuChildObject {
   private void initStyles() {
 
     int size = this.sudoku.getSize();
-    List<Partitioning> partitionings = this.sudoku.getPartitionings();
     Partitioning borders = null;
     BorderType borderType = null;
-    for (Partitioning partitioning : partitionings) {
+    for (Partitioning partitioning : this.sudoku) {
       BorderType type = partitioning.getBorderType();
       if (type != BorderType.NONE) {
         borderType = type;
@@ -156,9 +164,9 @@ public final class Field extends SudokuChildObject {
         break;
       }
     }
-    for (int x = 1; x <= size; x++) {
-      for (int y = 1; y <= size; y++) {
-        Field field = this.sudoku.getField(x, y);
+    for (int x0 = 1; x0 <= size; x0++) {
+      for (int y0 = 1; y0 <= size; y0++) {
+        Field field = this.sudoku.getField(x0, y0);
         field.initColorStyle();
         if (borderType != null) {
           field.initBorderStyle(borders);
@@ -175,9 +183,7 @@ public final class Field extends SudokuChildObject {
   private void initColorStyle() {
 
     int color = 0;
-    List<Partitioning> partitionings = this.sudoku.getPartitionings();
-    for (int i = 0; i < partitionings.size(); i++) {
-      Partitioning partitioning = partitionings.get(i);
+    for (Partitioning partitioning : this.sudoku) {
       ColorType colorType = partitioning.getColorType();
       if (colorType != ColorType.NONE) {
         int partitionIndex = getPartitionIndex(partitioning);
@@ -225,8 +231,7 @@ public final class Field extends SudokuChildObject {
 
   private boolean isTopBorder(Partitioning borders) {
 
-    int y = getY();
-    if (y == 1) {
+    if (this.y == 1) {
       return true;
     }
     return false;
@@ -234,12 +239,11 @@ public final class Field extends SudokuChildObject {
 
   private boolean isRightBorder(Partitioning borders) {
 
-    int x = getX();
-    if (x == this.sudoku.getSize()) {
+    if (this.x == this.sudoku.getSize()) {
       return true;
     }
-    Field right = this.sudoku.getField(x + 1, getY());
-    if (getPartitionIndex(borders) != right.getPartitionIndex(borders)) {
+    Field right = this.sudoku.getField(this.x + 1, this.y);
+    if (getPartition(borders) != right.getPartition(borders)) {
       return true;
     }
     return false;
@@ -247,12 +251,11 @@ public final class Field extends SudokuChildObject {
 
   private boolean isBottomBorder(Partitioning borders) {
 
-    int y = getY();
-    if (y == this.sudoku.getSize()) {
+    if (this.y == this.sudoku.getSize()) {
       return true;
     }
-    Field up = this.sudoku.getField(getX(), y + 1);
-    if (getPartitionIndex(borders) != up.getPartitionIndex(borders)) {
+    Field up = this.sudoku.getField(this.x, this.y + 1);
+    if (getPartition(borders) != up.getPartition(borders)) {
       return true;
     }
     return false;
@@ -260,74 +263,77 @@ public final class Field extends SudokuChildObject {
 
   private boolean isLeftBorder(Partitioning borders) {
 
-    int x = getX();
-    if (x == 1) {
+    if (this.x == 1) {
       return true;
     }
     return false;
   }
 
   /**
-   * @param i the index of the {@link Sudoku#getSymbol(int) symbol} in the range from {@code 0} to
-   *        <code>{@link Sudoku#getSize()}-1</code>.
-   * @return {@code true} if the candidate is possible, {@code false} otherwise (already excluded).
+   * @return the {@link Candidates} of this {@link Field}.
    */
-  public boolean hasCandidate(int i) {
+  public Candidates getCandidates() {
 
-    if (this.value > 0) {
-      return (this.value == i);
-    }
-    if (i <= 0) {
-      return false;
-    }
-    return !this.excludedCandidates.get(i);
+    return this.candidates;
   }
 
   /**
-   * @param candidate the {@link #getValue() value} candidate to exclude in the range from {@code 1} to
-   *        <code>{@link Sudoku#getSize()}</code>.
+   * @param candidates the new value of {@link #getCandidates()}.
+   * @return {@code true} if something actually changed, {@code false} otherwise.
+   */
+  public boolean setCandidates(Candidates candidates) {
+
+    if (this.candidates.getEncodedBitValue() == candidates.getEncodedBitValue()) {
+      LOG.trace("No change for setCandidates in {}", this);
+      return false;
+    }
+    SudokuChangeEventCandidates event = new SudokuChangeEventCandidates(this, this.candidates, candidates);
+    this.candidates = candidates;
+    fireEvent(event);
+    return true;
+  }
+
+  /**
+   * @param candidate the {@link #getValue() value} {@link Candidates#has(int) candidate}.
+   * @return {@code true} if the candidate is possible, {@code false} otherwise (already excluded).
+   */
+  public boolean hasCandidate(int candidate) {
+
+    if (this.value > 0) {
+      return (this.value == candidate);
+    }
+    if (candidate <= 0) {
+      return false;
+    }
+    return this.candidates.has(candidate);
+  }
+
+  /**
+   * @param candidate the {@link #hasCandidate(int) candidate} to exclude.
    * @return {@code true} if something actually changed, {@code false} otherwise.
    */
   public boolean excludeCandidate(int candidate) {
 
     validateValue(candidate);
-    if (this.excludedCandidates.get(candidate)) {
-      LOG.trace("No change for excludeCandidate({}) in {}", candidate, this);
-      return false;
-    }
-    this.excludedCandidates.set(candidate);
-    fireEvent(new SudokuChangeEventExcludeCandidate(this, candidate));
-    return true;
+    return setCandidates(this.candidates.exclude(candidate));
   }
 
   /**
-   * @param candidate the {@link #getValue() value} candidate to (re)include in the range from {@code 1} to
-   *        <code>{@link Sudoku#getSize()}</code>.
+   * @param candidate the {@link #hasCandidate(int) candidate} to include.
    * @return {@code true} if something actually changed, {@code false} otherwise.
    */
   public boolean includeCandidate(int candidate) {
 
     validateValue(candidate);
-    if (!this.excludedCandidates.get(candidate)) {
-      LOG.trace("No change for includeCandidate({}) in {}", candidate, this);
-      return false;
-    }
-    this.excludedCandidates.clear(candidate);
-    fireEvent(new SudokuChangeEventIncludeCandidate(this, candidate));
-    return true;
+    return setCandidates(this.candidates.include(candidate));
   }
 
   /**
-   * @param candidate the {@link #getValue() value} candidate to toggle in the range from {@code 1} to
-   *        <code>{@link Sudoku#getSize()}</code>.
+   * @param candidate the {@link #hasCandidate(int) candidate} to toggle.
    */
   public void toggleCandidate(int candidate) {
 
-    if (hasCandidate(candidate)) {
-      excludeCandidate(candidate);
-    } else {
-      includeCandidate(candidate);
-    }
+    setCandidates(this.candidates.flip(candidate));
   }
 
   /**
@@ -335,7 +341,7 @@ public final class Field extends SudokuChildObject {
    */
   public int getExcludedCandidateCount() {
 
-    return this.excludedCandidates.cardinality();
+    return this.candidates.getExclusionCount();
   }
 
   /**
@@ -357,7 +363,7 @@ public final class Field extends SudokuChildObject {
     if (getIncludedCandidateCount() == 1) {
       int size = this.sudoku.getSize();
       for (int i = 1; i <= size; i++) {
-        if (!this.excludedCandidates.get(i)) {
+        if (!this.candidates.has(i)) {
           return i;
         }
       }
@@ -404,7 +410,7 @@ public final class Field extends SudokuChildObject {
    * @param value the new {@link #getValue() value}.
    * @param given the {@link #isGiven() given flag}.
    * @return {@code true} if something actually changed, {@code false} otherwise.
-   * @see Sudoku#setFieldValue(Field, int, boolean)
+   * @see Sudoku#setFieldValue(Field, int, boolean, boolean)
    */
   public boolean setValue(int value, boolean given) {
 
@@ -540,7 +546,7 @@ public final class Field extends SudokuChildObject {
     sb.append(" solution=");
     appendValue(this.solution, sb);
     sb.append(" excluded=");
-    sb.append(this.excludedCandidates);
+    sb.append(this.candidates);
     if (this.error) {
       sb.append(" error!");
     }

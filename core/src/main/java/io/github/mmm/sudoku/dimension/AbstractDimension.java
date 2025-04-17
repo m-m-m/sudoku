@@ -6,12 +6,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import io.github.mmm.sudoku.JigsawSudoku;
 import io.github.mmm.sudoku.Sudoku;
-import io.github.mmm.sudoku.child.Box;
-import io.github.mmm.sudoku.child.Column;
-import io.github.mmm.sudoku.child.Region;
-import io.github.mmm.sudoku.child.Row;
+import io.github.mmm.sudoku.partitioning.Box;
+import io.github.mmm.sudoku.partitioning.Column;
+import io.github.mmm.sudoku.partitioning.Jigsaw;
+import io.github.mmm.sudoku.partitioning.Region;
+import io.github.mmm.sudoku.partitioning.Row;
 
 /**
  * Abstract base implementation of {@link Dimension}.
@@ -74,9 +74,9 @@ public abstract class AbstractDimension implements Dimension {
 
   /**
    * @return the base of the {@link Sudoku} as the square-root of its {@link #getSize() size}. Or {@code -1} if not a
-   *         regular dimension (e.g. a {@link JigsawSudoku} can have an irregular dimension such as a {@link #getSize()
-   *         size} of {@code 5}). A regular {@link Sudoku} has {@link Box}es usesing the base as width and height and
-   *         therefore must have a regular dimension.
+   *         regular dimension (e.g. a {@link Jigsaw}-{@link Sudoku} can have an irregular dimension such as a
+   *         {@link #getSize() size} of {@code 5}). A regular {@link Sudoku} has {@link Box}es usesing the base as width
+   *         and height and therefore must have a regular dimension.
    */
   @Override
   public int getBase() {

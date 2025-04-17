@@ -9,15 +9,29 @@ module io.github.mmm.sudoku {
 
   requires transitive io.github.mmm.event;
 
+  requires io.github.mmm.base;
+
   exports io.github.mmm.sudoku;
 
+  exports io.github.mmm.sudoku.builder;
+
   exports io.github.mmm.sudoku.child;
+
+  exports io.github.mmm.sudoku.common;
 
   exports io.github.mmm.sudoku.dimension;
 
   exports io.github.mmm.sudoku.event;
 
+  exports io.github.mmm.sudoku.field;
+
   exports io.github.mmm.sudoku.history;
+
+  exports io.github.mmm.sudoku.partition;
+
+  exports io.github.mmm.sudoku.partitioning;
+
+  exports io.github.mmm.sudoku.solution;
 
   exports io.github.mmm.sudoku.style;
 

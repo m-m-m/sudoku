@@ -4,7 +4,7 @@ package io.github.mmm.sudoku.style;
 
 /**
  * {@link Enum} with the available types for the borders of a
- * {@link io.github.mmm.sudoku.child.Partitioning#getPartitionCount() partition}.
+ * {@link io.github.mmm.sudoku.partitioning.Partitioning#getPartitionCount() partition}.
  */
 public enum BorderType {
 

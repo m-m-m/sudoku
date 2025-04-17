@@ -4,7 +4,7 @@ package io.github.mmm.sudoku.event;
 
 import java.util.Objects;
 
-import io.github.mmm.sudoku.child.Field;
+import io.github.mmm.sudoku.field.Field;
 
 /**
  * {@link SudokuChangeEvent} for {@link Field#setValue(int)} or {@link Field#setSolution(int)}.

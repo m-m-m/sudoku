@@ -1,8 +1,9 @@
 /* Copyright (c) The m-m-m Team, Licensed under the Apache License, Version 2.0
  * http://www.apache.org/licenses/LICENSE-2.0 */
-package io.github.mmm.sudoku.child;
+package io.github.mmm.sudoku.partitioning;
 
 import io.github.mmm.sudoku.Sudoku;
+import io.github.mmm.sudoku.field.Field;
 
 /**
  * Implementation of {@link Region} as square box for a normal {@link Sudoku}. In a classic {@link Sudoku} the
@@ -30,16 +31,16 @@ import io.github.mmm.sudoku.Sudoku;
  * <td>8,2</td>
  * <td>9,2</td>
  * </tr>
- * <tr style="border-bottom: 3px solid">
- * <td>1,3</td>
- * <td>2,3</td>
- * <td style="border-right: 3px solid">3,3</td>
- * <td>4,3</td>
- * <td>5,3</td>
- * <td style="border-right: 3px solid">6,3</td>
- * <td>7,3</td>
- * <td>8,3</td>
- * <td>9,3</td>
+ * <tr>
+ * <td style="border-bottom:3px solid">1,3</td>
+ * <td style="border-bottom:3px solid">2,3</td>
+ * <td style="border-bottom:3px solid;border-right: 3px solid">3,3</td>
+ * <td style="border-bottom:3px solid">4,3</td>
+ * <td style="border-bottom:3px solid">5,3</td>
+ * <td style="border-bottom:3px solid;border-right: 3px solid">6,3</td>
+ * <td style="border-bottom:3px solid">7,3</td>
+ * <td style="border-bottom:3px solid">8,3</td>
+ * <td style="border-bottom:3px solid">9,3</td>
  * </tr>
  * <tr>
  * <td>1,4</td>
@@ -58,21 +59,21 @@ import io.github.mmm.sudoku.Sudoku;
  * <td style="border-right: 3px solid">3,5</td>
  * <td>4,5</td>
  * <td>5,5</td>
- * <td style="border-right: 3px solid">6,5</td>
+ * <td style="border-right:3px solid">6,5</td>
  * <td>7,5</td>
  * <td>8,5</td>
  * <td>9,5</td>
  * </tr>
- * <tr style="border-bottom: 3px solid">
- * <td>1,6</td>
- * <td>2,6</td>
- * <td style="border-right: 3px solid">3,6</td>
- * <td>4,6</td>
- * <td>5,6</td>
- * <td style="border-right: 3px solid">6,6</td>
- * <td>7,6</td>
- * <td>8,6</td>
- * <td>9,6</td>
+ * <tr>
+ * <td style="border-bottom:3px solid">1,6</td>
+ * <td style="border-bottom:3px solid">2,6</td>
+ * <td style="border-bottom:3px solid;border-right: 3px solid">3,6</td>
+ * <td style="border-bottom:3px solid">4,6</td>
+ * <td style="border-bottom:3px solid">5,6</td>
+ * <td style="border-bottom:3px solid;border-right: 3px solid">6,6</td>
+ * <td style="border-bottom:3px solid">7,6</td>
+ * <td style="border-bottom:3px solid">8,6</td>
+ * <td style="border-bottom:3px solid">9,6</td>
  * </tr>
  * <tr>
  * <td>1,7</td>
@@ -112,27 +113,30 @@ import io.github.mmm.sudoku.Sudoku;
  */
 public final class Box extends Region {
 
+  /** {@link RegionFactory} for {@link Box}. */
+  public static final RegionFactory FACTORY = (s, i) -> new Box(s, i);
+
   /**
    * The constructor.
    *
    * @param sudoku the {@link #getSudoku() sudoku}.
+   * @param index the {@link #getIndex() index}.
    */
-  public Box(Sudoku sudoku) {
+  public Box(Sudoku sudoku, int index) {
 
-    super(sudoku);
+    super(sudoku, index, Box::getField);
   }
 
-  @Override
-  public Field getPartitionField(int partitionIndex, int fieldIndex) {
+  private static Field getField(Sudoku sudoku, int partitionIndex, int fieldIndex) {
 
-    int b = this.sudoku.getBase();
+    int base = sudoku.getBase();
     int partition = partitionIndex - 1;
-    int x0 = 1 + (partition % b) * b;
-    int y0 = 1 + (partition / b) * b;
+    int x0 = 1 + (partition % base) * base;
+    int y0 = 1 + (partition / base) * base;
     int field = fieldIndex - 1;
-    int x = x0 + (field % b);
-    int y = y0 + (field / b);
-    return this.sudoku.getField(x, y);
+    int x = x0 + (field % base);
+    int y = y0 + (field / base);
+    return sudoku.getField(x, y);
   }
 
 }

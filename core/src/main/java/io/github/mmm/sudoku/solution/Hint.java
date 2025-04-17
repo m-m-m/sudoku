@@ -3,6 +3,7 @@ package io.github.mmm.sudoku.solution;
 import java.util.List;
 
 import io.github.mmm.sudoku.Sudoku;
+import io.github.mmm.sudoku.common.Difficulty;
 
 /**
  * A {@link Hint} is a logical next step on the way to the solution of a {@link Sudoku}. It is {@link #getSteps()
@@ -11,7 +12,7 @@ import io.github.mmm.sudoku.Sudoku;
  */
 public class Hint {
 
-  private final Difficulty difficulty;
+  private final int difficulty;
 
   private final List<HintStep> steps;
 
@@ -21,7 +22,7 @@ public class Hint {
    * @param difficulty the {@link #getDifficulty}
    * @param steps the {@link #getSteps() steps}.
    */
-  public Hint(Difficulty difficulty, List<HintStep> steps) {
+  public Hint(int difficulty, List<HintStep> steps) {
 
     super();
     this.difficulty = difficulty;
@@ -29,9 +30,9 @@ public class Hint {
   }
 
   /**
-   * @return the {@link Difficulty} of this {@link Hint}.
+   * @return the difficulty score in the range from {@code 1} (trivial) to {@code 100} (brute force).
    */
-  public Difficulty getDifficulty() {
+  public int getDifficulty() {
 
     return this.difficulty;
   }

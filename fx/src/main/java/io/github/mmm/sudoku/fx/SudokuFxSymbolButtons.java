@@ -3,14 +3,14 @@
 package io.github.mmm.sudoku.fx;
 
 import io.github.mmm.sudoku.Sudoku;
-import io.github.mmm.sudoku.child.Field;
 import io.github.mmm.sudoku.child.SudokuContainer;
+import io.github.mmm.sudoku.field.Field;
 import javafx.scene.control.Button;
 import javafx.scene.layout.GridPane;
 
 /**
  * Widget for the buttons with the {@link Sudoku#getSymbol(int) symbols}. Allows to
- * {@link Sudoku#setFieldValue(io.github.mmm.sudoku.child.Field, int) set field values} in the currently selected
+ * {@link Sudoku#setFieldValue(io.github.mmm.sudoku.field.Field, int) set field values} in the currently selected
  * {@link Field}.
  */
 public class SudokuFxSymbolButtons extends GridPane implements SudokuContainer, ValueCompletion {

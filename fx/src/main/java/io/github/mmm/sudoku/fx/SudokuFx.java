@@ -2,7 +2,6 @@
  * http://www.apache.org/licenses/LICENSE-2.0 */
 package io.github.mmm.sudoku.fx;
 
-import io.github.mmm.sudoku.HyperSudoku;
 import io.github.mmm.sudoku.Sudoku;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -40,8 +39,46 @@ public class SudokuFx extends Application {
 
   private static Sudoku generateSudoku() {
 
-    Sudoku sudoku = new HyperSudoku();
-    // implement puzzle generator
+    return generateXSudoku();
+  }
+
+  private static Sudoku generateXSudoku() {
+
+    Sudoku sudoku = Sudoku.builder().withBoxes().with9x9().withX().build();
+    // TODO implement puzzle generator
+    sudoku.setFieldGivenValue(2, 1, 7);
+    sudoku.setFieldGivenValue(3, 1, 2);
+    sudoku.setFieldGivenValue(4, 1, 4);
+    sudoku.setFieldGivenValue(5, 1, 9);
+    sudoku.setFieldGivenValue(7, 1, 5);
+    sudoku.setFieldGivenValue(2, 2, 9);
+    sudoku.setFieldGivenValue(7, 2, 2);
+    sudoku.setFieldGivenValue(4, 3, 3);
+    sudoku.setFieldGivenValue(8, 3, 1);
+    sudoku.setFieldGivenValue(2, 4, 4);
+    sudoku.setFieldGivenValue(9, 4, 1);
+    sudoku.setFieldGivenValue(2, 5, 1);
+    sudoku.setFieldGivenValue(3, 5, 3);
+    sudoku.setFieldGivenValue(7, 5, 8);
+    sudoku.setFieldGivenValue(8, 5, 5);
+    sudoku.setFieldGivenValue(1, 6, 8);
+    sudoku.setFieldGivenValue(8, 6, 2);
+    sudoku.setFieldGivenValue(2, 7, 3);
+    sudoku.setFieldGivenValue(6, 7, 4);
+    sudoku.setFieldGivenValue(3, 8, 4);
+    sudoku.setFieldGivenValue(8, 8, 6);
+    sudoku.setFieldGivenValue(3, 9, 1);
+    sudoku.setFieldGivenValue(5, 9, 2);
+    sudoku.setFieldGivenValue(6, 9, 6);
+    sudoku.setFieldGivenValue(7, 9, 3);
+    sudoku.setFieldGivenValue(8, 9, 4);
+    return sudoku;
+  }
+
+  private static Sudoku generateHyperSudoku() {
+
+    Sudoku sudoku = Sudoku.builder().withBoxes().with9x9().withHyper().build();
+    // TODO implement puzzle generator
     sudoku.setFieldGivenValue(2, 1, 7);
     sudoku.setFieldGivenValue(4, 1, 9);
     sudoku.setFieldGivenValue(4, 2, 1);
