@@ -14,9 +14,12 @@ import org.slf4j.LoggerFactory;
 import io.github.mmm.base.collection.ArrayIterator;
 import io.github.mmm.event.AbstractEventSender;
 import io.github.mmm.sudoku.builder.SudokuBuilder;
+import io.github.mmm.sudoku.common.AttributeModificationCounter;
+import io.github.mmm.sudoku.common.Candidates;
 import io.github.mmm.sudoku.dimension.AbstractDimension;
 import io.github.mmm.sudoku.dimension.Dimension;
-import io.github.mmm.sudoku.dimension.RegularDimension;
+import io.github.mmm.sudoku.dimension.DimensionType;
+import io.github.mmm.sudoku.dimension.SquareDimension;
 import io.github.mmm.sudoku.event.ChangeAware;
 import io.github.mmm.sudoku.event.SudokuChangeEvent;
 import io.github.mmm.sudoku.event.SudokuEvent;
@@ -31,6 +34,9 @@ import io.github.mmm.sudoku.partitioning.FlexiblePartitioning.RegionFactory;
 import io.github.mmm.sudoku.partitioning.Partitioning;
 import io.github.mmm.sudoku.partitioning.Row;
 import io.github.mmm.sudoku.partitioning.Sum;
+import io.github.mmm.sudoku.solution.AbstractHint;
+import io.github.mmm.sudoku.solution.Hint;
+import io.github.mmm.sudoku.solution.HintStep;
 
 /**
  * Represents a Sudoku puzzle.<br>
@@ -55,18 +61,22 @@ import io.github.mmm.sudoku.partitioning.Sum;
  * </pre>
  */
 public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListener>
-    implements Dimension, ChangeAware, Iterable<Partitioning> {
+    implements Dimension, ChangeAware, AttributeModificationCounter, Iterable<Partitioning> {
 
   private static final Logger LOG = LoggerFactory.getLogger(Sudoku.class);
 
   /** @see #getSize() */
   protected final AbstractDimension dimension;
 
+  private final Candidates allCandidates;
+
   private final Field[][] fields;
 
   private final Partitioning[] partitionings;
 
   private final String type;
+
+  private int modificationCounter;
 
   private ChangeSet lastChange;
 
@@ -77,7 +87,7 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
    */
   public Sudoku() {
 
-    this(RegularDimension.NORMAL, Box.FACTORY);
+    this(SquareDimension.D9, Box.FACTORY);
   }
 
   /**
@@ -91,6 +101,8 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
 
     super();
     this.dimension = dimension;
+    int bitMask = (2 << (dimension.getSize() - 1)) - 1;
+    this.allCandidates = Candidates.of(bitMask);
     this.fields = createFields();
     this.partitionings = new Partitioning[factories.length + 3];
     int i = 0;
@@ -140,21 +152,33 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
   }
 
   @Override
-  public int getBase() {
-
-    return this.dimension.getBase();
-  }
-
-  @Override
   public int getSize() {
 
     return this.dimension.getSize();
   }
 
   @Override
-  public boolean isRegular() {
+  public int getBoxWidth() {
 
-    return this.dimension.isRegular();
+    return this.dimension.getBoxWidth();
+  }
+
+  @Override
+  public int getBoxHeight() {
+
+    return this.dimension.getBoxHeight();
+  }
+
+  @Override
+  public int getBoxSize() {
+
+    return this.dimension.getBoxSize();
+  }
+
+  @Override
+  public DimensionType getDimensionType() {
+
+    return this.dimension.getDimensionType();
   }
 
   /**
@@ -177,12 +201,26 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
   }
 
   /**
+   * @return the {@link Candidates} that {@link Candidates#has(int) has} all possible {@link Field#getValue() values}.
+   */
+  public Candidates getAllCandidates() {
+
+    return this.allCandidates;
+  }
+
+  /**
    * @param x the {@link Field#getX() x-coordinate} in the range from {@code 1} to <code>{@link #getSize()}</code>.
    * @param y the {@link Field#getY() y-coordinate} in the range from {@code 1} to <code>{@link #getSize()}</code>.
    * @return the {@link Field} at the given position.
    */
   public Field getField(int x, int y) {
 
+    if (x - 1 >= this.fields.length) {
+      throw new IndexOutOfBoundsException(x);
+    }
+    if (y - 1 >= this.fields[x - 1].length) {
+      throw new IndexOutOfBoundsException(y);
+    }
     return this.fields[x - 1][y - 1];
   }
 
@@ -249,14 +287,9 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
         }
       }
     }
-    if (withHistory) {
-      endUndoHistory(changeSet);
-    } else {
-      assert (changeSet == null);
-      assert (this.currentChanges == null);
-      if (given) {
-        assert (this.lastChange == null) : "Given clues should be set before actual values!";
-      }
+    endUndoHistory(changeSet);
+    if ((changeSet == null) && given) {
+      assert (this.lastChange == null) : "Given clues should be set before actual values!";
     }
   }
 
@@ -271,8 +304,44 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
     endUndoHistory(changeSet);
   }
 
+  /**
+   * @param field the {@link Field} to modify.
+   * @param candidates the {@link Candidates} to {@link Candidates#exclude(Candidates) exclude}.
+   */
+  public void excludeCandidates(Field field, Candidates candidates) {
+
+    ChangeSet changeSet = startUndoHistory();
+    field.setCandidates(field.getCandidates().exclude(candidates));
+    endUndoHistory(changeSet);
+  }
+
+  /**
+   * @param hint the {@link Hint} or {@link HintStep} to {@link AbstractHint#apply()}.
+   */
+  public void apply(AbstractHint hint) {
+
+    apply(hint, true);
+  }
+
+  /**
+   * @param hint the {@link Hint} or {@link HintStep} to {@link AbstractHint#apply()}.
+   * @param withHistory - {@code true} to add history events for {@link #undo() undo} support, {@code false} otherwise.
+   */
+  public void apply(AbstractHint hint, boolean withHistory) {
+
+    ChangeSet changeSet = null;
+    if (withHistory) {
+      changeSet = startUndoHistory();
+    }
+    hint.apply();
+    endUndoHistory(changeSet);
+  }
+
   private ChangeSet startUndoHistory() {
 
+    if (this.currentChanges != null) {
+      return null; // even history already started (sub-transaction)
+    }
     // collect change events in ChangeSet for undo feature
     this.currentChanges = new ArrayList<>();
     return new ChangeSet(this.currentChanges, this.lastChange);
@@ -280,6 +349,9 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
 
   private void endUndoHistory(ChangeSet changeSet) {
 
+    if (changeSet == null) {
+      return; // event history not yet ended (sub-transaction)
+    }
     this.currentChanges = null; // end "transaction" to record changes
     this.lastChange = changeSet;
   }
@@ -310,6 +382,12 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
   public ChangeSet getLastChange() {
 
     return this.lastChange;
+  }
+
+  @Override
+  public int getModificationCounter() {
+
+    return this.modificationCounter;
   }
 
   @Override
@@ -375,16 +453,16 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
 
   /**
    * Internal method - use only when you know what you are doing.
-   *
-   * @param event the {@link SudokuEvent} to send.
-   * @return {@code true} if dispatched, {@code false} otherwise (no listeners).
    */
   @Override
   public boolean fireEvent(SudokuEvent<?> event) {
 
     LOG.debug("{}", event);
-    if ((this.currentChanges != null) && (event instanceof SudokuChangeEvent<?> changeEvent)) {
-      this.currentChanges.add(changeEvent);
+    if (event instanceof SudokuChangeEvent<?> changeEvent) {
+      this.modificationCounter++;
+      if (this.currentChanges != null) {
+        this.currentChanges.add(changeEvent);
+      }
     }
     return super.fireEvent(event);
   }
@@ -397,11 +475,11 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
   public String getCandidateMatrix(IntPredicate candidateFunction) {
 
     int size = getSize();
-    int base = getBase();
+    int boxSize = getBoxSize();
     int rowCount = 0;
     StringBuilder sb = new StringBuilder(size * 2);
     for (int i = 1; i <= size; i++) {
-      if (rowCount == base) {
+      if (rowCount == boxSize) {
         sb.append('\n');
         rowCount = 0;
       } else {

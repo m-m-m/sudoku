@@ -43,6 +43,11 @@
         <artifactId>javafx-web</artifactId>
         <version>${javafx.version}</version>
       </dependency>
+      <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+        <version>1.5.18</version>
+      </dependency>
       <!-- own modules -->
       <dependency>
         <groupId>${project.groupId}</groupId>

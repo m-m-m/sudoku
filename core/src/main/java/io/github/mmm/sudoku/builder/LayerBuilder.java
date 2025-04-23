@@ -3,10 +3,9 @@ package io.github.mmm.sudoku.builder;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.github.mmm.sudoku.partitioning.Color;
 import io.github.mmm.sudoku.partitioning.FlexiblePartitioning.LayerFactory;
-import io.github.mmm.sudoku.partitioning.Hyper;
 import io.github.mmm.sudoku.partitioning.Layer;
-import io.github.mmm.sudoku.partitioning.Percent;
 import io.github.mmm.sudoku.partitioning.X;
 import io.github.mmm.sudoku.partitioning.X1;
 import io.github.mmm.sudoku.partitioning.X2;
@@ -34,25 +33,13 @@ public class LayerBuilder extends IntermediateBuilder<SumBuilder> {
   }
 
   /**
-   * Adds {@link Hyper}.
+   * Adds {@link Color}.
    *
    * @return the {@link SumBuilder} for fluent builder API calls.
    */
-  public SumBuilder withHyper() {
+  public SumBuilder withColor() {
 
-    this.layerFactories.add(Hyper.FACTORY);
-    return next();
-  }
-
-  /**
-   * Adds {@link Percent}.
-   *
-   * @return the {@link SumBuilder} for fluent builder API calls.
-   */
-
-  public SumBuilder withPercent() {
-
-    this.layerFactories.add(Percent.FACTORY);
+    this.layerFactories.add(Color.FACTORY);
     return next();
   }
 
@@ -94,7 +81,7 @@ public class LayerBuilder extends IntermediateBuilder<SumBuilder> {
    * @param factory the (custom) {@link LayerFactory} to add.
    * @return the {@link SumBuilder} for fluent builder API calls.
    */
-  public SumBuilder with(LayerFactory factory) {
+  protected SumBuilder with(LayerFactory factory) {
 
     this.layerFactories.add(factory);
     return next();

@@ -30,4 +30,12 @@ public abstract class HintStepField extends HintStep {
     return this.field;
   }
 
+  @Override
+  protected void createMessage(StringBuilder sb, boolean first) {
+
+    super.createMessage(sb, first);
+    sb.append(" in field ");
+    this.field.appendCoordinates(sb);
+  }
+
 }

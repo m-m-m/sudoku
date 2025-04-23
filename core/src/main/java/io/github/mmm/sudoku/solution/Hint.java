@@ -10,7 +10,7 @@ import io.github.mmm.sudoku.common.Difficulty;
  * composed} of multiple {@link HintStep} that allow to explain this {@link Hint} to the end-user. Also, it
  * {@link #getDifficulty() has} a {@link Difficulty} scoring how easy or hard it is to come to the hint.
  */
-public class Hint {
+public class Hint implements AbstractHint {
 
   private final int difficulty;
 
@@ -27,6 +27,11 @@ public class Hint {
     super();
     this.difficulty = difficulty;
     this.steps = steps;
+    boolean first = true;
+    for (HintStep step : steps) {
+      step.init(first);
+      first = false;
+    }
   }
 
   /**
@@ -43,6 +48,14 @@ public class Hint {
   public List<HintStep> getSteps() {
 
     return this.steps;
+  }
+
+  @Override
+  public void apply() {
+
+    for (HintStep step : this.steps) {
+      step.apply();
+    }
   }
 
 }

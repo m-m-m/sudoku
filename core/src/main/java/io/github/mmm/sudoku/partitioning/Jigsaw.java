@@ -3,6 +3,7 @@
 package io.github.mmm.sudoku.partitioning;
 
 import io.github.mmm.sudoku.Sudoku;
+import io.github.mmm.sudoku.dimension.DimensionType;
 import io.github.mmm.sudoku.field.Field;
 import io.github.mmm.sudoku.style.ColorType;
 
@@ -27,9 +28,9 @@ public class Jigsaw extends Region {
   }
 
   @Override
-  public boolean isRegular() {
+  public DimensionType getDimensionType() {
 
-    return false;
+    return DimensionType.PRIME;
   }
 
   @Override

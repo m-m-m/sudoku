@@ -7,6 +7,7 @@ import io.github.mmm.sudoku.event.SudokuEvent;
 import io.github.mmm.sudoku.event.SudokuEventListener;
 import io.github.mmm.sudoku.event.SudokuEventSelectField;
 import io.github.mmm.sudoku.field.Field;
+import io.github.mmm.sudoku.solution.SudokuSolver;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
@@ -17,9 +18,11 @@ public class SudokuFxPuzzle extends BorderPane implements SudokuFxView, SudokuEv
 
   private final Sudoku sudoku;
 
+  private SudokuSolver solver;
+
   private final SudokuFxBoard board;
 
-  private final SudokuFxHistoryButtons historyButtons;
+  private final SudokuFxActionButtons historyButtons;
 
   private final SudokuFxSymbolButtons mainButtons;
 
@@ -39,7 +42,7 @@ public class SudokuFxPuzzle extends BorderPane implements SudokuFxView, SudokuEv
     super();
     this.sudoku = sudoku;
     this.board = new SudokuFxBoard(this);
-    this.historyButtons = new SudokuFxHistoryButtons(this);
+    this.historyButtons = new SudokuFxActionButtons(this);
     this.mainButtons = new SudokuFxSymbolButtons(this, false);
     this.candidateButtons = new SudokuFxSymbolButtons(this, true);
     setCenter(this.board);
@@ -57,6 +60,17 @@ public class SudokuFxPuzzle extends BorderPane implements SudokuFxView, SudokuEv
   public Sudoku getSudoku() {
 
     return this.sudoku;
+  }
+
+  /**
+   * @return solver
+   */
+  public SudokuSolver getSolver() {
+
+    if (this.solver == null) {
+      this.solver = SudokuSolver.of();
+    }
+    return this.solver;
   }
 
   /**

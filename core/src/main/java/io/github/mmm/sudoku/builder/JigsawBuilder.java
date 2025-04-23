@@ -2,7 +2,7 @@ package io.github.mmm.sudoku.builder;
 
 import io.github.mmm.sudoku.Sudoku;
 import io.github.mmm.sudoku.dimension.AbstractDimension;
-import io.github.mmm.sudoku.dimension.IrregularDimension;
+import io.github.mmm.sudoku.dimension.PrimeDimension;
 import io.github.mmm.sudoku.partition.Partition;
 import io.github.mmm.sudoku.partitioning.Jigsaw;
 import io.github.mmm.sudoku.partitioning.Region;
@@ -25,77 +25,44 @@ public class JigsawBuilder extends RegionBuilder {
 
   /**
    * @param dimension the {@link AbstractDimension} of the {@link Sudoku}.
-   * @return the {@link LayerBuilder} for fluent builder API calls.
+   * @return the {@link SquareLayerBuilder} for fluent builder API calls.
    */
-  public LayerBuilder with(AbstractDimension dimension) {
+  public SquareLayerBuilder with(AbstractDimension dimension) {
 
     this.dim = dimension;
     return next();
   }
 
   /**
-   * Use {@link IrregularDimension#D5 5x5}.
+   * Use {@link PrimeDimension#D5 5x5}.
    *
-   * @return the {@link LayerBuilder} for fluent builder API calls.
+   * @return the {@link SquareLayerBuilder} for fluent builder API calls.
    */
-  public LayerBuilder with5x5() {
+  public SquareLayerBuilder with5x5() {
 
-    this.dim = IrregularDimension.D5;
+    this.dim = PrimeDimension.D5;
     return next();
   }
 
   /**
-   * Use {@link IrregularDimension#D6 6x6}.
+   * Use {@link PrimeDimension#D7 7x7}.
    *
-   * @return the {@link LayerBuilder} for fluent builder API calls.
+   * @return the {@link SquareLayerBuilder} for fluent builder API calls.
    */
-  public LayerBuilder with6x6() {
+  public SquareLayerBuilder with7x7() {
 
-    this.dim = IrregularDimension.D6;
+    this.dim = PrimeDimension.D7;
     return next();
   }
 
   /**
-   * Use {@link IrregularDimension#D7 7x7}.
+   * Use {@link PrimeDimension#D11 11x11}.
    *
-   * @return the {@link LayerBuilder} for fluent builder API calls.
+   * @return the {@link SquareLayerBuilder} for fluent builder API calls.
    */
-  public LayerBuilder with7x7() {
+  public SquareLayerBuilder with11x11() {
 
-    this.dim = IrregularDimension.D7;
-    return next();
-  }
-
-  /**
-   * Use {@link IrregularDimension#D8 8x8}.
-   *
-   * @return the {@link LayerBuilder} for fluent builder API calls.
-   */
-  public LayerBuilder with8x8() {
-
-    this.dim = IrregularDimension.D8;
-    return next();
-  }
-
-  /**
-   * Use {@link IrregularDimension#D10 10x10}.
-   *
-   * @return the {@link LayerBuilder} for fluent builder API calls.
-   */
-  public LayerBuilder with10x10() {
-
-    this.dim = IrregularDimension.D10;
-    return next();
-  }
-
-  /**
-   * Use {@link IrregularDimension#D11 11x11}.
-   *
-   * @return the {@link LayerBuilder} for fluent builder API calls.
-   */
-  public LayerBuilder with11x11() {
-
-    this.dim = IrregularDimension.D11;
+    this.dim = PrimeDimension.D11;
     return next();
   }
 

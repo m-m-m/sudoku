@@ -4,6 +4,7 @@ package io.github.mmm.sudoku.partitioning;
 
 import io.github.mmm.sudoku.Sudoku;
 import io.github.mmm.sudoku.dimension.Dimension;
+import io.github.mmm.sudoku.dimension.DimensionType;
 import io.github.mmm.sudoku.field.Field;
 import io.github.mmm.sudoku.partition.Partition;
 
@@ -132,14 +133,14 @@ public class Hyper extends Layer {
       @Override
       public int getPartitionCount(Dimension dimension) {
 
-        int b0 = dimension.getBase() - 1;
+        int b0 = dimension.getBoxSize() - 1;
         return b0 * b0;
       }
 
       @Override
       public Field getField(Sudoku s, int partitionIndex, int fieldIndex) {
 
-        int b = sudoku.getBase();
+        int b = sudoku.getBoxSize();
         int b0 = b - 1;
         int b1 = b + 1;
         int partition = partitionIndex - 1;
@@ -151,5 +152,11 @@ public class Hyper extends Layer {
         return s.getField(x, y);
       }
     });
+  }
+
+  @Override
+  public DimensionType getDimensionType() {
+
+    return DimensionType.SQUARE;
   }
 }

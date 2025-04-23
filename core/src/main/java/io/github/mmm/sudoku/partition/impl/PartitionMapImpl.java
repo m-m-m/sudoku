@@ -1,3 +1,5 @@
+/* Copyright (c) The m-m-m Team, Licensed under the Apache License, Version 2.0
+ * http://www.apache.org/licenses/LICENSE-2.0 */
 package io.github.mmm.sudoku.partition.impl;
 
 import java.util.HashMap;
@@ -17,6 +19,8 @@ public class PartitionMapImpl implements PartitionMap {
 
   private final Partition partition;
 
+  private final int modificationCounter;
+
   private AggregatedFieldGroupImpl[] counts;
 
   private TupleIterable[] tuples;
@@ -30,12 +34,19 @@ public class PartitionMapImpl implements PartitionMap {
 
     super();
     this.partition = partition;
+    this.modificationCounter = partition.getSudoku().getModificationCounter();
   }
 
   @Override
   public Partition getPartition() {
 
     return this.partition;
+  }
+
+  @Override
+  public int getModificationCounter() {
+
+    return this.modificationCounter;
   }
 
   @Override
@@ -95,13 +106,18 @@ public class PartitionMapImpl implements PartitionMap {
     for (AggregatedFieldGroupImpl group : getCounts()) {
       int fieldCount = group.getFieldCount();
       int i = fieldCount - 1;
-      if (i > 0) {
-        if (this.tuples[i] == null) {
-          this.tuples[i] = new TupleIterable(group);
+      if (i >= 0) {
+        if (result[i] == null) {
+          result[i] = new TupleIterable(group);
         } else {
-          group.next = this.tuples[i].first;
-          this.tuples[i].first = group;
+          group.next = result[i].first;
+          result[i].first = group;
         }
+      }
+    }
+    for (int i = 0; i < result.length; i++) {
+      if (result[i] == null) {
+        result[i] = TupleIterable.EMPTY;
       }
     }
     return result;

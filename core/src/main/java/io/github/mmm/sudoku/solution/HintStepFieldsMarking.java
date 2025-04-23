@@ -10,12 +10,18 @@ public class HintStepFieldsMarking extends HintStepFields {
   /**
    * The constructor.
    *
-   * @param message the {@link #getMessage() message}.
+   * @param name the {@link #getName() name}.
    * @param fields the {@link #getFields() fields}.
    */
-  public HintStepFieldsMarking(String message, Field... fields) {
+  public HintStepFieldsMarking(String name, Field... fields) {
 
-    super(message, fields);
+    super(name, fields);
+  }
+
+  @Override
+  protected String getAttributedFieldForMessage() {
+
+    return "marked field";
   }
 
 }

@@ -33,6 +33,8 @@ module io.github.mmm.sudoku {
 
   exports io.github.mmm.sudoku.solution;
 
+  exports io.github.mmm.sudoku.solution.strategy;
+
   exports io.github.mmm.sudoku.style;
 
 }

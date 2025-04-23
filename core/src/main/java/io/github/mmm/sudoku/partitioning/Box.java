@@ -129,13 +129,14 @@ public final class Box extends Region {
 
   private static Field getField(Sudoku sudoku, int partitionIndex, int fieldIndex) {
 
-    int base = sudoku.getBase();
+    int boxWidth = sudoku.getBoxWidth();
+    int boxHeight = sudoku.getBoxHeight();
     int partition = partitionIndex - 1;
-    int x0 = 1 + (partition % base) * base;
-    int y0 = 1 + (partition / base) * base;
+    int x0 = 1 + (partition % boxHeight) * boxWidth;
+    int y0 = 1 + (partition / boxHeight) * boxHeight;
     int field = fieldIndex - 1;
-    int x = x0 + (field % base);
-    int y = y0 + (field / base);
+    int x = x0 + (field % boxWidth);
+    int y = y0 + (field / boxWidth);
     return sudoku.getField(x, y);
   }
 

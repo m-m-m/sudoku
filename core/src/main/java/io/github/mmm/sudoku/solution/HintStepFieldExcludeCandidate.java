@@ -12,14 +12,24 @@ public class HintStepFieldExcludeCandidate extends HintStepField {
   /**
    * The constructor.
    *
-   * @param message the {@link #getMessage() message}.
+   * @param name the {@link #getName() name}.
    * @param field the {@link #getField() field}.
    * @param candidate the {@link #getCandidate() candidate}.
    */
-  public HintStepFieldExcludeCandidate(String message, Field field, int candidate) {
+  public HintStepFieldExcludeCandidate(String name, Field field, int candidate) {
 
-    super(message, field);
+    super(name, field);
     this.candidate = candidate;
+  }
+
+  @Override
+  protected void createMessage(StringBuilder sb, boolean first) {
+
+    sb.append("We can exclude the candidate ");
+    sb.append(this.candidate);
+    sb.append(" from field ");
+    this.field.appendCoordinates(sb);
+    sb.append('.');
   }
 
   /**
@@ -31,8 +41,9 @@ public class HintStepFieldExcludeCandidate extends HintStepField {
   }
 
   @Override
-  public void apply(boolean quick) {
+  public void apply() {
 
+    super.apply();
     this.field.excludeCandidate(this.candidate);
   }
 

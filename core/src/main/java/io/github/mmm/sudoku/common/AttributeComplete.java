@@ -1,3 +1,5 @@
+/* Copyright (c) The m-m-m Team, Licensed under the Apache License, Version 2.0
+ * http://www.apache.org/licenses/LICENSE-2.0 */
 package io.github.mmm.sudoku.common;
 
 import io.github.mmm.sudoku.Sudoku;
@@ -18,7 +20,7 @@ public interface AttributeComplete {
    *         {@link Field} in the partition. An incomplete {@link Partition} is e.g. used in a {@link Sum}Doku that has
    *         {@link Partition}s that may cover only a few {@link Field}s (e.g. 2, 3, ...) and specify the
    *         {@link Partition#getSum() sum} of the covered values. In a
-   *         {@link io.github.mmm.sudoku.dimension.RegularDimension#NORMAL normal} 9x9 SumDoku a
+   *         {@link io.github.mmm.sudoku.dimension.SquareDimension#D9 normal} 9x9 SumDoku a
    *         {@link Partition#getSum() sum}-{@link Partition} may still be complete if it covers 9 {@link Field}s and
    *         has a {@link Partition#getSum() sum} of {@code 45}.<br>
    *         A {@link Partitioning} is only <em>complete</em> if it covers the entire {@link Sudoku} or in other words

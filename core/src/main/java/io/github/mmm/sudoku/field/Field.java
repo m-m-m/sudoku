@@ -19,7 +19,10 @@ import io.github.mmm.sudoku.event.SudokuChangeEventSetMarked;
 import io.github.mmm.sudoku.event.SudokuChangeEventSetValue;
 import io.github.mmm.sudoku.event.SudokuEvent;
 import io.github.mmm.sudoku.partition.Partition;
+import io.github.mmm.sudoku.partitioning.Hyper;
 import io.github.mmm.sudoku.partitioning.Partitioning;
+import io.github.mmm.sudoku.partitioning.Percent;
+import io.github.mmm.sudoku.partitioning.X;
 import io.github.mmm.sudoku.style.BorderStyle;
 import io.github.mmm.sudoku.style.BorderType;
 import io.github.mmm.sudoku.style.ColorType;
@@ -69,7 +72,7 @@ public final class Field extends SudokuChildObject {
     this.y = y;
     this.value = UNDEFINED;
     this.solution = UNDEFINED;
-    this.candidates = Candidates.ofAll();
+    this.candidates = sudoku.getAllCandidates();
   }
 
   private boolean fireEvent(SudokuEvent<?> event) {
@@ -85,36 +88,36 @@ public final class Field extends SudokuChildObject {
    */
   public Partition getPartition(Partitioning partitioning) {
 
-    if (this.partitions == null) {
-      initPartitions();
-    }
-    return this.partitions[partitioning.getIndex() - 1];
+    return getPartition(partitioning.getIndex());
   }
 
   /**
-   * @param partitioning the {@link Partitioning}.
-   * @return the {@code partitionIndex} of this {@link Field} in the given {@link Partitioning} so it can be found via
-   *         {@link Partitioning#getPartitionField(int, int)}. May be {@code -1} if this {@link Field} is not included
-   *         in the given {@link Partitioning} (e.g. for Hyper, Percent, or X).
-   * @deprecated use {@link #getPartition(Partitioning)} instead.
+   * @param partitioningIndex the {@link Partitioning}-{@link Partitioning#getIndex() index}.
+   * @return the the {@link Partition} of the given {@link Partitioning}-{@link Partitioning#getIndex() index}
+   *         containing this {@link Field} or {@code null} if no such {@link Partition} exists (e.g. special
+   *         {@link Partitioning}s like {@link Hyper}, {@link X}, {@link Percent}, etc. do not cover all fields).
    */
-  @Deprecated
-  public int getPartitionIndex(Partitioning partitioning) {
+  public Partition getPartition(int partitioningIndex) {
 
-    Partition partition = getPartition(partitioning);
-    if (partition == null) {
-      return UNDEFINED;
+    if ((partitioningIndex < 1) || (partitioningIndex > this.sudoku.getPartitioningCount())) {
+      throw new IndexOutOfBoundsException(partitioningIndex);
     }
-    return partition.getIndex();
+    if (this.partitions == null) {
+      initPartitions();
+    }
+    return this.partitions[partitioningIndex - 1];
   }
 
   private void initPartitions() {
 
     int partitioningCount = this.sudoku.getPartitioningCount();
     for (Partitioning partitioning : this.sudoku) {
+      LOG.debug("Initializing partitions for {}", partitioning.getName());
       int partitioningIndex = partitioning.getIndex();
       for (Partition partition : partitioning) {
+        LOG.debug("Initializing partition {}", partition);
         for (Field field : partition) {
+          LOG.debug("Initializing {}", field);
           if (field.partitions == null) {
             field.partitions = new Partition[partitioningCount];
           }
@@ -186,15 +189,18 @@ public final class Field extends SudokuChildObject {
     for (Partitioning partitioning : this.sudoku) {
       ColorType colorType = partitioning.getColorType();
       if (colorType != ColorType.NONE) {
-        int partitionIndex = getPartitionIndex(partitioning);
-        if (partitionIndex < 0) {
-          color = color + colorType.getOffset(partitioning);
-        } else {
-          color = colorType.getColor(color, partitionIndex, partitioning);
-          if (color > 0) {
-            addStyle("color" + color);
+        Partition partition = getPartition(partitioning);
+        if (partition != null) {
+          int partitionIndex = partition.getIndex();
+          if (partitionIndex < 0) {
+            color = color + colorType.getOffset(partitioning);
+          } else {
+            color = colorType.getColor(color, partitionIndex, partitioning);
+            if (color > 0) {
+              addStyle("color" + color);
+            }
+            return;
           }
-          return;
         }
       }
     }
@@ -341,7 +347,7 @@ public final class Field extends SudokuChildObject {
    */
   public int getExcludedCandidateCount() {
 
-    return this.candidates.getExclusionCount();
+    return this.sudoku.getSize() - getIncludedCandidateCount();
   }
 
   /**
@@ -351,7 +357,7 @@ public final class Field extends SudokuChildObject {
    */
   public int getIncludedCandidateCount() {
 
-    return this.sudoku.getSize() - getExcludedCandidateCount();
+    return this.candidates.getInclusionCount();
   }
 
   /**
@@ -363,7 +369,7 @@ public final class Field extends SudokuChildObject {
     if (getIncludedCandidateCount() == 1) {
       int size = this.sudoku.getSize();
       for (int i = 1; i <= size; i++) {
-        if (!this.candidates.has(i)) {
+        if (this.candidates.has(i)) {
           return i;
         }
       }
@@ -533,19 +539,38 @@ public final class Field extends SudokuChildObject {
     return true;
   }
 
+  /**
+   * @param sb the {@link StringBuilder} where to append the coordinates to.
+   */
+  public void appendCoordinates(StringBuilder sb) {
+
+    sb.append(getX());
+    sb.append('x');
+    sb.append(getY());
+  }
+
+  /**
+   * @return a short {@link String} representation of this {@link Field} to append to arbitrary messages.
+   */
+  public String toShortString() {
+
+    StringBuilder sb = new StringBuilder(11);
+    sb.append("field ");
+    appendCoordinates(sb);
+    return sb.toString();
+  }
+
   @Override
   public String toString() {
 
     StringBuilder sb = new StringBuilder(96);
     sb.append("Field ");
-    sb.append(getX());
-    sb.append('x');
-    sb.append(getY());
+    appendCoordinates(sb);
     sb.append(" value=");
     appendValue(this.value, sb);
     sb.append(" solution=");
     appendValue(this.solution, sb);
-    sb.append(" excluded=");
+    sb.append(" candidates=");
     sb.append(this.candidates);
     if (this.error) {
       sb.append(" error!");

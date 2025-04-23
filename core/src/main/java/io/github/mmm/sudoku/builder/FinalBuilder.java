@@ -4,17 +4,13 @@ import io.github.mmm.sudoku.Sudoku;
 import io.github.mmm.sudoku.partitioning.FlexiblePartitioning.LayerFactory;
 
 /**
- * TODO joerg This type ...
- *
+ * Final {@link Builder} of the actual {@link Sudoku}.
  */
 public class FinalBuilder implements Builder {
 
   private final SumBuilder sumBuilder;
 
-  /**
-   * The constructor.
-   */
-  public FinalBuilder(SumBuilder sumBuilder) {
+  FinalBuilder(SumBuilder sumBuilder) {
 
     super();
     this.sumBuilder = sumBuilder;

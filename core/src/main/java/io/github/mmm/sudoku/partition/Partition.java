@@ -37,6 +37,8 @@ public class Partition extends AbstractFieldGroup implements SudokuContainer, At
 
   private final boolean complete;
 
+  private PartitionMap partitionMap;
+
   /**
    * The constructor.
    *
@@ -122,11 +124,16 @@ public class Partition extends AbstractFieldGroup implements SudokuContainer, At
   }
 
   /**
-   * @return the computed {@link PartitionMap}. Is only valid while the {@link Sudoku} remains unchanged.
+   * @return the computed {@link PartitionMap}. Is only valid while the {@link Sudoku} remains unchanged. Otherwise this
+   *         method will compute a new map.
    */
-  public PartitionMap computeMap() {
+  public PartitionMap getPartitionMap() {
 
-    return new PartitionMapImpl(this);
+    if ((this.partitionMap == null)
+        || (this.partitionMap.getModificationCounter() != getSudoku().getModificationCounter())) {
+      this.partitionMap = new PartitionMapImpl(this);
+    }
+    return this.partitionMap;
   }
 
   @Override

@@ -6,26 +6,23 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import io.github.mmm.sudoku.Sudoku;
-import io.github.mmm.sudoku.partitioning.Box;
-import io.github.mmm.sudoku.partitioning.Column;
-import io.github.mmm.sudoku.partitioning.Jigsaw;
-import io.github.mmm.sudoku.partitioning.Region;
-import io.github.mmm.sudoku.partitioning.Row;
-
 /**
  * Abstract base implementation of {@link Dimension}.
  */
 public abstract class AbstractDimension implements Dimension {
 
-  /** The default {@link #getAlphabet() alphabet}. */
-  protected static final List<String> ALPHABET = List.of("0", //
+  /** The simple {@link #getAlphabet() alphabet}. */
+  protected static final List<String> ALPHABET = List.of( //
       "1", "2", "3", "4", "5", "6", "7", "8", "9", // 9x9
-      "A", "B", "C", "D", "E", "F", // 16x16
-      "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V" // 32x32
+      "A", "B", "C", "D", "E", "F", "G", // 16x16
+      "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V" // 32x32
   );
 
-  private final int base;
+  private final int boxWidth;
+
+  private final int boxHeigth;
+
+  private final int boxSize;
 
   private final int size;
 
@@ -34,66 +31,87 @@ public abstract class AbstractDimension implements Dimension {
   /**
    * The constructor.
    *
-   * @param base the {@link #getBase() base}.
+   * @param boxWidth the {@link #getBoxWidth() boxWidth}.
+   * @param boxHeight the {@link #getBoxHeight() boxHeight}.
    * @param size the {@link #getSize() size}.
    */
-  protected AbstractDimension(int base, int size) {
+  protected AbstractDimension(int boxWidth, int boxHeight, int size) {
 
-    this(base, size, ALPHABET);
+    this(boxWidth, boxHeight, size, null);
   }
 
   /**
    * The constructor.
    *
-   * @param base the {@link #getBase() base}.
+   * @param boxWidth the {@link #getBoxWidth() boxWidth}.
+   * @param boxHeight the {@link #getBoxHeight() boxHeight}.
    * @param size the {@link #getSize() size}.
    * @param alphabet the {@link #getAlphabet() alphabet}.
    */
-  protected AbstractDimension(int base, int size, List<String> alphabet) {
+  protected AbstractDimension(int boxWidth, int boxHeight, int size, List<String> alphabet) {
 
     super();
-    if (!validate(base, size, alphabet)) {
-      throw new IllegalArgumentException("base:" + base + ", size:" + size);
+    if (!validate(boxWidth, boxHeight, size, alphabet)) {
+      throw new IllegalArgumentException(boxWidth + "x" + boxHeight + "=" + size);
     }
-    this.base = base;
+    this.boxWidth = boxWidth;
+    this.boxHeigth = boxHeight;
+    if (boxWidth == boxHeight) {
+      this.boxSize = boxWidth;
+    } else {
+      this.boxSize = (int) Math.ceil(Math.sqrt(size));
+    }
     this.size = size;
-    this.alphabet = alphabet;
+    if (alphabet == null) {
+      String[] alph = new String[size];
+      for (int i = 1; i <= size; i++) {
+        alph[i - 1] = Integer.toString(i);
+      }
+      this.alphabet = List.of(alph);
+    } else {
+      this.alphabet = alphabet;
+    }
   }
 
-  private boolean validate(int b, int s, List<String> alph) {
+  private boolean validate(int bw, int bh, int s, List<String> alph) {
 
-    if ((s < 3) || (s > 64) || (s > alph.size())) {
+    if ((s < 3) || (s > 64) || ((alph != null) && (s > alph.size()))) {
       return false;
     }
-    if (isRegular()) {
-      return ((b > 1) && ((b * b) == s));
+    if ((bw * bh) != s) {
+      return false;
+    }
+    DimensionType dimensionType = getDimensionType();
+    if (dimensionType == DimensionType.SQUARE) {
+      return bw == bh;
+    } else if (dimensionType == DimensionType.RECTANGULAR) {
+      return (bw > 1) || (bh > 1);
     } else {
-      return ((s != 4) && (s != 9) && (s != 16) && (s != 25) && (s != 36) && (s != 49) && (s != 64));
+      return switch (s) {
+        case 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61 -> true;
+        default -> false;
+      };
     }
   }
 
-  /**
-   * @return the base of the {@link Sudoku} as the square-root of its {@link #getSize() size}. Or {@code -1} if not a
-   *         regular dimension (e.g. a {@link Jigsaw}-{@link Sudoku} can have an irregular dimension such as a
-   *         {@link #getSize() size} of {@code 5}). A regular {@link Sudoku} has {@link Box}es usesing the base as width
-   *         and height and therefore must have a regular dimension.
-   */
   @Override
-  public int getBase() {
+  public int getBoxWidth() {
 
-    return this.base;
+    return this.boxWidth;
   }
 
-  /**
-   * @return the size of this {@link Sudoku} as its width and height. So the size represents the number or
-   *         {@link Column}s and {@link Row}s as well as {@link Region}s. Regular dimensions have a {@link #getBase()
-   *         base} defined and then the size is the square of that base. So a classical {@link Sudoku} has a
-   *         {@link #getBase() base} of {@code 3} and therefore a {@link #getSize() size} of {@code 9} with
-   *         {@link #getSymbol(int) symbols} from 1 to 9. A "Kids-Sudoku" has a {@link #getBase() base} of {@code 2} and
-   *         therefore a {@link #getSize() size} of {@code 4} with {@link #getSymbol(int) symbols} from 1 to 4. A hex or
-   *         16x16 {@link Sudoku} has a {@link #getBase() basis} of {@code 4} and therefore a {@link #getSize() size} of
-   *         {@code 16} with {@link #getSymbol(int) symbols} from 1 to F.
-   */
+  @Override
+  public int getBoxHeight() {
+
+    return this.boxHeigth;
+  }
+
+  @Override
+  public int getBoxSize() {
+
+    return this.boxSize;
+  }
+
   @Override
   public int getSize() {
 
@@ -114,17 +132,13 @@ public abstract class AbstractDimension implements Dimension {
     if ((value < 1) || (value > this.size)) {
       throw new IndexOutOfBoundsException(value);
     }
-    int i = value;
-    if (this.size > 9) {
-      i--;
-    }
-    return this.alphabet.get(i);
+    return this.alphabet.get(value - 1);
   }
 
   @Override
   public String toString() {
 
-    return this.size + "[" + this.base + "]";
+    return this.size + "[" + this.boxWidth + "x" + this.boxHeigth + "]";
   }
 
   /**
@@ -138,6 +152,15 @@ public abstract class AbstractDimension implements Dimension {
       result.add(Character.toString(alphabet.charAt(i)));
     }
     return Collections.unmodifiableList(result);
+  }
+
+  /**
+   * @param size the {@link #getSize() size} (number of values).
+   * @return the sum <code>1+2+...+size</code>.
+   */
+  public static int gaussianSum(int size) {
+
+    return ((size * size) + size) / 2;
   }
 
 }

@@ -12,18 +12,18 @@ import org.junit.jupiter.api.Test;
 public class CandidatesTest extends Assertions {
 
   @Test
-  public void testOfAll() {
+  public void testOfNone() {
 
     // arrange
     Candidates candidates;
     // act
-    candidates = Candidates.ofAll();
+    candidates = Candidates.ofNone();
     // assert
     verify(candidates);
-    assertThat(candidates.getExclusionCount()).isEqualTo(0);
+    assertThat(candidates.getInclusionCount()).isEqualTo(0);
     assertThat(candidates.getEncodedBitValue()).isEqualTo(0);
-    assertThat(candidates.toExcludedArray()).isEmpty();
-    assertThat(candidates.toIncludedArray(9)).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9);
+    assertThat(candidates.toIncludedArray()).isEmpty();
+    assertThat(candidates.toExcludedArray(9)).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9);
     assertThat(candidates).hasToString("{}");
   }
 
@@ -33,12 +33,12 @@ public class CandidatesTest extends Assertions {
     // arrage
     Candidates candidates;
     // act
-    candidates = Candidates.ofAll().exclude(9).exclude(7).exclude(5).exclude(3).exclude(1);
+    candidates = Candidates.ofNone().include(9).include(7).include(5).include(3).include(1);
     // assert
     verify(candidates);
-    assertThat(candidates.getExclusionCount()).isEqualTo(5);
-    assertThat(candidates.toExcludedArray()).containsExactly(1, 3, 5, 7, 9);
-    assertThat(candidates.toIncludedArray(9)).containsExactly(2, 4, 6, 8);
+    assertThat(candidates.getInclusionCount()).isEqualTo(5);
+    assertThat(candidates.toIncludedArray()).containsExactly(1, 3, 5, 7, 9);
+    assertThat(candidates.toExcludedArray(9)).containsExactly(2, 4, 6, 8);
     assertThat(candidates).hasToString("{1,3,5,7,9}");
   }
 
@@ -46,22 +46,22 @@ public class CandidatesTest extends Assertions {
   public void testPooling() {
 
     // arrange
-    Candidates all = Candidates.ofAll();
+    Candidates none = Candidates.ofNone();
     // act
-    Candidates exclude1 = all.exclude(1);
-    Candidates exclude9 = all.exclude(9);
-    Candidates exclude10 = all.exclude(10);
+    Candidates include1 = none.include(1);
+    Candidates include9 = none.include(9);
+    Candidates include10 = none.include(10);
     // assert
-    verify(exclude1);
-    verify(exclude9);
-    verify(exclude10);
-    assertThat(all.exclude(1)).isSameAs(exclude1);
-    assertThat(exclude1.include(1)).isSameAs(all);
-    assertThat(all.exclude(9)).isSameAs(exclude9);
-    assertThat(exclude9.include(9)).isSameAs(all);
-    assertThat(exclude10.include(10)).isSameAs(all);
+    verify(include1);
+    verify(include9);
+    verify(include10);
+    assertThat(none.include(1)).isSameAs(include1);
+    assertThat(include1.exclude(1)).isSameAs(none);
+    assertThat(none.include(9)).isSameAs(include9);
+    assertThat(include9.exclude(9)).isSameAs(none);
+    assertThat(include10.exclude(10)).isSameAs(none);
     // testing "anti-feature": to avoid memory waste, we only pool 9 bits (for 9x9 Sudoku)
-    assertThat(all.exclude(10)).isNotSameAs(exclude10);
+    assertThat(none.include(10)).isNotSameAs(include10);
   }
 
   private void verify(Candidates candidates) {
@@ -83,7 +83,7 @@ public class CandidatesTest extends Assertions {
       assertThat(flipped9.flip(9)).isEqualTo(candidates);
     }
     assertThat(candidates).hasToString(
-        Arrays.toString(candidates.toExcludedArray()).replace('[', '{').replace(']', '}').replace(" ", ""));
+        Arrays.toString(candidates.toIncludedArray()).replace('[', '{').replace(']', '}').replace(" ", ""));
   }
 
 }

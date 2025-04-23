@@ -28,14 +28,7 @@ public class Color extends Layer {
 
   private static Field getField(Sudoku sudoku, int partitionIndex, int fieldIndex) {
 
-    int base = sudoku.getBase();
-    int field = fieldIndex - 1;
-    int x0 = 1 + (field % base) * base;
-    int y0 = 1 + (field / base) * base;
-    int partition = partitionIndex - 1;
-    int x = x0 + (partition % base);
-    int y = y0 + (partition / base);
-    return sudoku.getField(x, y);
+    return sudoku.getPartitioning(3).getPartition(fieldIndex).getField(partitionIndex);
   }
 
   @Override

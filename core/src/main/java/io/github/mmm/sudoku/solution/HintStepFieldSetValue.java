@@ -1,6 +1,7 @@
 package io.github.mmm.sudoku.solution;
 
 import io.github.mmm.sudoku.field.Field;
+import io.github.mmm.sudoku.solution.strategy.SolutionStrategy;
 
 /**
  * {@link HintStepField} for {@link Field#setValue(int)}.
@@ -12,14 +13,23 @@ public class HintStepFieldSetValue extends HintStepField {
   /**
    * The constructor.
    *
-   * @param message the {@link #getMessage() message}.
+   * @param name the {@link SolutionStrategy#getName() hint name}.
    * @param field the {@link #getField() field}.
    * @param value the {@link #getValue() value}.
    */
-  public HintStepFieldSetValue(String message, Field field, int value) {
+  public HintStepFieldSetValue(String name, Field field, int value) {
 
-    super(message, field);
+    super(name, field);
     this.value = value;
+  }
+
+  @Override
+  protected void createMessage(StringBuilder sb, boolean first) {
+
+    super.createMessage(sb, first);
+    sb.append(" that we can set to value ");
+    sb.append(this.value);
+    sb.append('.');
   }
 
   /**
@@ -31,9 +41,10 @@ public class HintStepFieldSetValue extends HintStepField {
   }
 
   @Override
-  public void apply(boolean quick) {
+  public void apply() {
 
-    this.field.getSudoku().setFieldValue(this.field, this.value, false, !quick);
+    super.apply();
+    this.field.getSudoku().setFieldValue(this.field, this.value);
   }
 
 }

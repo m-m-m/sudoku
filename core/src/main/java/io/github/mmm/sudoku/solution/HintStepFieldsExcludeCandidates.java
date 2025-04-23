@@ -1,5 +1,6 @@
 package io.github.mmm.sudoku.solution;
 
+import io.github.mmm.sudoku.common.Candidates;
 import io.github.mmm.sudoku.field.Field;
 
 /**
@@ -7,38 +8,51 @@ import io.github.mmm.sudoku.field.Field;
  */
 public final class HintStepFieldsExcludeCandidates extends HintStepFields {
 
-  private int[] candidates;
+  private Candidates candidates;
 
   /**
    * The constructor.
    *
-   * @param message the {@link #getMessage() message}.
+   * @param name the {@link #getName() name}.
    * @param fields the {@link #getFields() fields}.
    * @param candidates the {@link #getCandidates()}.
    */
-  public HintStepFieldsExcludeCandidates(String message, Field[] fields, int... candidates) {
+  public HintStepFieldsExcludeCandidates(String name, Field[] fields, Candidates candidates) {
 
-    super(message, fields);
-    assert (fields.length > 0);
-    assert (candidates.length > 0);
+    super(name, fields);
+    assert (candidates != null);
     this.candidates = candidates;
   }
 
+  @Override
+  protected void createMessage(StringBuilder sb, boolean first) {
+
+    sb.append("We can exclude the candidate");
+    if (this.candidates.getInclusionCount() > 1) {
+      sb.append('s');
+    }
+    sb.append(' ');
+    sb.append(this.candidates);
+
+    sb.append(" from ");
+    appendFieldsToMessage(sb);
+    sb.append('.');
+  }
+
   /**
-   * @return the candidates to exclude. Do not modify from the outside.
+   * @return the {@link Candidates} to exclude.
    */
-  public int[] getCandidates() {
+  public Candidates getCandidates() {
 
     return this.candidates;
   }
 
   @Override
-  public void apply(boolean quick) {
+  public void apply() {
 
+    super.apply();
     for (Field field : this.fields) {
-      for (int candidate : this.candidates) {
-        field.excludeCandidate(candidate);
-      }
+      field.setCandidates(field.getCandidates().exclude(this.candidates));
     }
   }
 

@@ -8,8 +8,9 @@ import io.github.mmm.base.collection.ArrayIterator;
 import io.github.mmm.sudoku.Sudoku;
 import io.github.mmm.sudoku.child.SudokuChildObject;
 import io.github.mmm.sudoku.common.AttributeComplete;
-import io.github.mmm.sudoku.common.AttributeRegular;
+import io.github.mmm.sudoku.common.AttributeDimensionType;
 import io.github.mmm.sudoku.dimension.Dimension;
+import io.github.mmm.sudoku.dimension.DimensionType;
 import io.github.mmm.sudoku.field.Field;
 import io.github.mmm.sudoku.partition.Partition;
 import io.github.mmm.sudoku.style.BorderType;
@@ -38,7 +39,7 @@ import io.github.mmm.sudoku.style.ColorType;
  * additional {@link Partitioning}. Special {@link Sudoku#getType() types} like {@link Hyper} add a fourth {@link Layer}
  * typically visualised by {@link Partitioning#getColorType() color}. However, there are also {@link Sudoku#getType()
  * types} like {@link io.github.mmm.sudoku.JigsawSudoku} that use irregular shapes instead of {@link Box boxes} and this
- * also allows to have a {@link Dimension} that is <b>not</b> {@link Sudoku#isRegular() regular} such as e.g. a 5x5
+ * also allows to have a {@link Dimension} that is <b>not</b> {@link Sudoku#isSquare() regular} such as e.g. a 5x5
  * {@link Sudoku} board that can not be split into {@link Box}es since 5 is not a square number.<br>
  * As you can see {@link Partitioning} is a very generic but powerful concept that allows to implement many
  * {@link Sudoku#getType() types} of {@link Sudoku}s easily without the need to write much extra code.<br>
@@ -50,7 +51,7 @@ import io.github.mmm.sudoku.style.ColorType;
  * @see Partition
  */
 public abstract class Partitioning extends SudokuChildObject
-    implements Iterable<Partition>, AttributeRegular, AttributeComplete {
+    implements Iterable<Partition>, AttributeDimensionType, AttributeComplete {
 
   private final int index;
 
@@ -83,9 +84,21 @@ public abstract class Partitioning extends SudokuChildObject
   private Partitioning(Sudoku sudoku, int index, PartitionFunction function, Partition[] partitions) {
 
     super(sudoku);
-    if (isRegular() && !sudoku.isRegular()) {
-      throw new IllegalStateException(
-          "Partitioning " + getName() + " is regular and does not support size " + sudoku.getSize());
+    switch (getDimensionType()) {
+      case SQUARE -> {
+        if (sudoku.getDimensionType() != DimensionType.SQUARE) {
+          throw new IllegalStateException(
+              "Partitioning " + getName() + " requires square dimension and does not support size " + sudoku.getSize());
+        }
+      }
+      case RECTANGULAR -> {
+        if (sudoku.getDimensionType() == DimensionType.PRIME) {
+          throw new IllegalStateException("Partitioning " + getName()
+              + " requires rectangular dimension and does not support size " + sudoku.getSize());
+        }
+      }
+      default -> {
+      }
     }
     this.index = index;
     if (partitions == null) {
@@ -126,9 +139,9 @@ public abstract class Partitioning extends SudokuChildObject
   }
 
   @Override
-  public boolean isRegular() {
+  public DimensionType getDimensionType() {
 
-    return true;
+    return DimensionType.RECTANGULAR;
   }
 
   /**

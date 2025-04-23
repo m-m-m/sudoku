@@ -39,7 +39,7 @@ public class SudokuFx extends Application {
 
   private static Sudoku generateSudoku() {
 
-    return generateXSudoku();
+    return generateHyperSudoku();
   }
 
   private static Sudoku generateXSudoku() {

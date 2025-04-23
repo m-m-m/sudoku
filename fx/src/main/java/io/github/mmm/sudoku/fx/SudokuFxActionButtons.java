@@ -2,13 +2,14 @@ package io.github.mmm.sudoku.fx;
 
 import io.github.mmm.sudoku.Sudoku;
 import io.github.mmm.sudoku.history.ChangeSet;
+import io.github.mmm.sudoku.solution.Hint;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 
 /**
- * View with undo and redo buttons.
+ * View with action buttons for undo, redo, etc.
  */
-public class SudokuFxHistoryButtons extends HBox implements SudokuFxView {
+public class SudokuFxActionButtons extends HBox implements SudokuFxView {
 
   private final SudokuFxPuzzle fxPuzzle;
 
@@ -18,12 +19,14 @@ public class SudokuFxHistoryButtons extends HBox implements SudokuFxView {
 
   private final Button redoButton;
 
+  private final Button hintButton;
+
   /**
    * The constructor.
    *
    * @param fxPuzzle the {@link SudokuFxPuzzle}.
    */
-  public SudokuFxHistoryButtons(SudokuFxPuzzle fxPuzzle) {
+  public SudokuFxActionButtons(SudokuFxPuzzle fxPuzzle) {
 
     super();
     this.fxPuzzle = fxPuzzle;
@@ -38,6 +41,10 @@ public class SudokuFxHistoryButtons extends HBox implements SudokuFxView {
     this.redoButton.setAccessibleHelp("redo");
     this.redoButton.setOnAction(e -> onRedo());
     getChildren().add(this.redoButton);
+    this.hintButton = new Button("?");
+    this.hintButton.setAccessibleHelp("hint");
+    this.hintButton.setOnAction(e -> onHint());
+    getChildren().add(this.hintButton);
     update();
   }
 
@@ -57,6 +64,15 @@ public class SudokuFxHistoryButtons extends HBox implements SudokuFxView {
 
     this.sudoku.redo();
     update();
+  }
+
+  private void onHint() {
+
+    Hint hint = this.fxPuzzle.getSolver().findHint(this.sudoku);
+    if (hint != null) {
+      this.sudoku.apply(hint);
+      update();
+    }
   }
 
   @Override

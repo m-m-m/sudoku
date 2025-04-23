@@ -3,6 +3,7 @@
 package io.github.mmm.sudoku.partitioning;
 
 import io.github.mmm.sudoku.Sudoku;
+import io.github.mmm.sudoku.dimension.DimensionType;
 
 /**
  * {@link Row} as {@link Partitioning}.
@@ -20,8 +21,8 @@ public class Row extends Partitioning {
   }
 
   @Override
-  public boolean isRegular() {
+  public DimensionType getDimensionType() {
 
-    return false;
+    return DimensionType.PRIME;
   }
 }

@@ -3,6 +3,8 @@
 package io.github.mmm.sudoku.partitioning;
 
 import io.github.mmm.sudoku.Sudoku;
+import io.github.mmm.sudoku.dimension.Dimension;
+import io.github.mmm.sudoku.dimension.DimensionType;
 import io.github.mmm.sudoku.field.Field;
 import io.github.mmm.sudoku.partition.Partition;
 
@@ -127,28 +129,45 @@ public class Percent extends Layer {
    */
   public Percent(Sudoku sudoku, int index) {
 
-    super(sudoku, index, Percent::getField);
+    super(sudoku, index, new PartitionFunction() {
+
+      @Override
+      public int getPartitionCount(Dimension dimension) {
+
+        return 3;
+      }
+
+      @Override
+      public Field getField(Sudoku s, int partitionIndex, int fieldIndex) {
+
+        int size = s.getSize();
+        if (size < 9) {
+          throw new IllegalStateException("Percent requires minimum size 9.");
+        }
+        if (partitionIndex == 2) {
+          // "/"
+          return s.getField(size + 1 - fieldIndex, fieldIndex);
+        } else if ((partitionIndex == 1) || (partitionIndex == 3)) {
+          int base = s.getBoxSize();
+          int offset = 2;
+          if (partitionIndex == 3) {
+            offset = size - base;
+          }
+          // boxes that make "/" to "%"
+          int field = fieldIndex - 1;
+          int x = offset + (field % base);
+          int y = offset + (field / base);
+          return s.getField(x, y);
+        } else {
+          throw new IndexOutOfBoundsException(partitionIndex);
+        }
+      }
+    });
   }
 
-  private static Field getField(Sudoku sudoku, int partitionIndex, int fieldIndex) {
+  @Override
+  public DimensionType getDimensionType() {
 
-    int size = sudoku.getSize();
-    if (partitionIndex == 2) {
-      // "/"
-      return sudoku.getField(size + 1 - fieldIndex, fieldIndex);
-    } else if ((partitionIndex == 1) || (partitionIndex == 3)) {
-      int base = sudoku.getBase();
-      int offset = 2;
-      if (partitionIndex == 3) {
-        offset = size - base;
-      }
-      // boxes that make "/" to "%"
-      int field = fieldIndex - 1;
-      int x = offset + (field % base);
-      int y = offset + (field / base);
-      return sudoku.getField(x, y);
-    } else {
-      throw new IndexOutOfBoundsException(partitionIndex);
-    }
+    return DimensionType.SQUARE;
   }
 }

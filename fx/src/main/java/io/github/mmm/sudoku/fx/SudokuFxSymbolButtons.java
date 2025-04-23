@@ -4,6 +4,7 @@ package io.github.mmm.sudoku.fx;
 
 import io.github.mmm.sudoku.Sudoku;
 import io.github.mmm.sudoku.child.SudokuContainer;
+import io.github.mmm.sudoku.dimension.DimensionType;
 import io.github.mmm.sudoku.field.Field;
 import javafx.scene.control.Button;
 import javafx.scene.layout.GridPane;
@@ -46,10 +47,10 @@ public class SudokuFxSymbolButtons extends GridPane implements SudokuContainer, 
   private void initButtons() {
 
     int size = this.sudoku.getSize();
-    int base = this.sudoku.getBase();
+    int base = this.sudoku.getBoxSize();
     int width = base;
     int height = base;
-    if (this.sudoku.isRegular()) {
+    if (this.sudoku.getDimensionType() != DimensionType.SQUARE) {
       height = size / base;
     }
     int i = 1;
