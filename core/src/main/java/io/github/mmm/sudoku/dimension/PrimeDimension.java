@@ -5,7 +5,7 @@ package io.github.mmm.sudoku.dimension;
 import java.util.List;
 
 /**
- * Regular {@link AbstractDimension} that have a {@link #getBase() base}.
+ * Prime {@link AbstractDimension dimension}.
  */
 public final class PrimeDimension extends AbstractDimension {
 
@@ -56,13 +56,13 @@ public final class PrimeDimension extends AbstractDimension {
   }
 
   /**
-   * @param base the {@link #getBase() base}.
+   * @param size the {@link #getSize() size}.
    * @param alphabet the custom {@link #getAlphabet() alphabet}.
    * @return the new {@link PrimeDimension}.
    */
-  public static PrimeDimension of(int base, List<String> alphabet) {
+  public static PrimeDimension of(int size, List<String> alphabet) {
 
-    return new PrimeDimension(base, alphabet);
+    return new PrimeDimension(size, alphabet);
   }
 
 }

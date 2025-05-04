@@ -6,7 +6,7 @@ import io.github.mmm.sudoku.common.Candidates;
 import io.github.mmm.sudoku.field.Field;
 
 /**
- * {@link SudokuChangeEventCandidate} for {@link Field#includeCandidate(int)}.
+ * {@link SudokuChangeEvent} for {@link Field#setCandidates(Candidates)}.
  */
 public final class SudokuChangeEventCandidates extends SudokuChangeEvent<SudokuChangeEventCandidates> {
 

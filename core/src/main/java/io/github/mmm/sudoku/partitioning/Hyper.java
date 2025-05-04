@@ -128,7 +128,7 @@ public class Hyper extends Layer {
    */
   public Hyper(Sudoku sudoku, int index) {
 
-    super(sudoku, index, new PartitionFunction() {
+    super(sudoku, index, new PartitionFunctionByField() {
 
       @Override
       public int getPartitionCount(Dimension dimension) {
@@ -158,5 +158,11 @@ public class Hyper extends Layer {
   public DimensionType getDimensionType() {
 
     return DimensionType.SQUARE;
+  }
+
+  @Override
+  public boolean isComplete() {
+
+    return false;
   }
 }

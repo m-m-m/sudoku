@@ -12,7 +12,7 @@ import io.github.mmm.sudoku.partitioning.X2;
 
 /**
  * {@link Enum} with the available types for the {@link ColorType} of the {@link io.github.mmm.sudoku.field.Field}s of a
- * {@link io.github.mmm.sudoku.partitioning.Partitioning#getPartitionCount() partition}.
+ * {@link Partition partition}.
  *
  * @see io.github.mmm.sudoku.partitioning.Partitioning#getColorType()
  */
@@ -71,8 +71,7 @@ public enum ColorType {
   },
 
   /**
-   * Alternating colors meaning that only even {@link io.github.mmm.sudoku.child.Partitioning#getPartitionCount()
-   * partitions} are colored with a single highlighting color.
+   * Alternating colors meaning that only even {@link Partition}s are colored with a single highlighting color.
    */
   ALTERNATE {
     @Override
@@ -93,12 +92,10 @@ public enum ColorType {
   },
 
   /**
-   * Distinct colors means that {@link io.github.mmm.sudoku.child.Partitioning#getPartitionCount() partitions} are
-   * colored such that neighbour {@link io.github.mmm.sudoku.child.Field}s from a different
-   * {@link io.github.mmm.sudoku.child.Partitioning#getPartitionCount() partition} always have a different color while
-   * using as little different colors as possible. According to graph-theory a maximum number of four colors are needed
-   * so that all {@link io.github.mmm.sudoku.child.Partitioning#getPartitionCount() partitions} can be uniquely
-   * identified by the user via different colors.
+   * Distinct colors means that {@link Partition}s are colored such that neighbour {@link Field}s from a different
+   * {@link Partition} always have a different color while using as little different colors as possible. According to
+   * graph-theory a maximum number of four colors are needed so that all {@link Partition}s can be uniquely identified
+   * by the user via different colors.
    */
   DISTINCT {
 
@@ -117,11 +114,8 @@ public enum ColorType {
   },
 
   /**
-   * Multiple coloring meaning that each {@link io.github.mmm.sudoku.child.Partitioning#getPartitionCount() partition}
-   * has its own unique color. Examples are {@link io.github.mmm.sudoku.Sudoku#getType() Sudoku types} like Color that
-   * have a fourth color {@link io.github.mmm.sudoku.child.Partitioning} or jigsaw where the
-   * {@link io.github.mmm.sudoku.child.Region regions} are irregular (not square {@link io.github.mmm.sudoku.child.Box
-   * boxes}).
+   * Multiple coloring meaning that each {@link Partition} has its own unique color. E.g. for
+   * {@link io.github.mmm.sudoku.Sudoku#getType() Sudoku types} like {@link io.github.mmm.sudoku.partitioning.Color}.
    */
   MULTIPLE {
 

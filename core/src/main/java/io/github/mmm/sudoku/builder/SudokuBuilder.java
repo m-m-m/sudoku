@@ -1,6 +1,8 @@
 package io.github.mmm.sudoku.builder;
 
 import io.github.mmm.sudoku.Sudoku;
+import io.github.mmm.sudoku.partition.Partition;
+import io.github.mmm.sudoku.partition.Shape;
 import io.github.mmm.sudoku.partitioning.Box;
 import io.github.mmm.sudoku.partitioning.Jigsaw;
 
@@ -29,12 +31,12 @@ public class SudokuBuilder implements Builder {
   /**
    * Create a {@link Jigsaw}-{@link Sudoku}.
    *
-   * @param seed the {@link Jigsaw} seed.
+   * @param shapes the {@link Shape}s for the {@link Jigsaw} {@link Partition}s.
    * @return the {@link JigsawBuilder} for fluent builder API calls.
    */
-  public JigsawBuilder withJigsaw(int seed) {
+  public JigsawBuilder withJigsaw(Shape... shapes) {
 
-    return new JigsawBuilder(seed);
+    return new JigsawBuilder(shapes);
   }
 
   @Override

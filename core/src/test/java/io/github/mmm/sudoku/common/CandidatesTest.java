@@ -24,6 +24,7 @@ public class CandidatesTest extends Assertions {
     assertThat(candidates.getEncodedBitValue()).isEqualTo(0);
     assertThat(candidates.toIncludedArray()).isEmpty();
     assertThat(candidates.toExcludedArray(9)).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9);
+    assertThat(candidates.getLowestCandidate()).isEqualTo(-1);
     assertThat(candidates).hasToString("{}");
   }
 
@@ -39,6 +40,7 @@ public class CandidatesTest extends Assertions {
     assertThat(candidates.getInclusionCount()).isEqualTo(5);
     assertThat(candidates.toIncludedArray()).containsExactly(1, 3, 5, 7, 9);
     assertThat(candidates.toExcludedArray(9)).containsExactly(2, 4, 6, 8);
+    assertThat(candidates.getLowestCandidate()).isEqualTo(1);
     assertThat(candidates).hasToString("{1,3,5,7,9}");
   }
 
@@ -59,7 +61,9 @@ public class CandidatesTest extends Assertions {
     assertThat(include1.exclude(1)).isSameAs(none);
     assertThat(none.include(9)).isSameAs(include9);
     assertThat(include9.exclude(9)).isSameAs(none);
+    assertThat(include9.getLowestCandidate()).isEqualTo(9);
     assertThat(include10.exclude(10)).isSameAs(none);
+    assertThat(include10.getLowestCandidate()).isEqualTo(10);
     // testing "anti-feature": to avoid memory waste, we only pool 9 bits (for 9x9 Sudoku)
     assertThat(none.include(10)).isNotSameAs(include10);
   }

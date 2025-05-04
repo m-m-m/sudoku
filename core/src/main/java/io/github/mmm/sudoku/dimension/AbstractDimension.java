@@ -6,6 +6,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import io.github.mmm.sudoku.partition.Shape;
+import io.github.mmm.sudoku.partitioning.Box;
+import io.github.mmm.sudoku.partitioning.Column;
+import io.github.mmm.sudoku.partitioning.Row;
+
 /**
  * Abstract base implementation of {@link Dimension}.
  */
@@ -27,6 +32,12 @@ public abstract class AbstractDimension implements Dimension {
   private final int size;
 
   private final List<String> alphabet;
+
+  private final Shape column;
+
+  private final Shape row;
+
+  private final Shape box;
 
   /**
    * The constructor.
@@ -71,6 +82,17 @@ public abstract class AbstractDimension implements Dimension {
     } else {
       this.alphabet = alphabet;
     }
+    this.row = new Shape(size);
+    Shape shape = null;
+    for (int i = 1; i <= size; i++) {
+      shape = new Shape(1, shape);
+    }
+    this.column = shape;
+    shape = null;
+    for (int i = 1; i <= boxHeight; i++) {
+      shape = new Shape(boxWidth, shape);
+    }
+    this.box = shape;
   }
 
   private boolean validate(int bw, int bh, int s, List<String> alph) {
@@ -133,6 +155,30 @@ public abstract class AbstractDimension implements Dimension {
       throw new IndexOutOfBoundsException(value);
     }
     return this.alphabet.get(value - 1);
+  }
+
+  /**
+   * @return the {@link Shape} of a {@link Column}.
+   */
+  public Shape getColumn() {
+
+    return this.column;
+  }
+
+  /**
+   * @return the {@link Shape} of a {@link Row}.
+   */
+  public Shape getRow() {
+
+    return this.row;
+  }
+
+  /**
+   * @return the {@link Shape} of a {@link Box}.
+   */
+  public Shape getBox() {
+
+    return this.box;
   }
 
   @Override

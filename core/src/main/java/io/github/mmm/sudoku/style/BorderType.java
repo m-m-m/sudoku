@@ -3,8 +3,8 @@
 package io.github.mmm.sudoku.style;
 
 /**
- * {@link Enum} with the available types for the borders of a
- * {@link io.github.mmm.sudoku.partitioning.Partitioning#getPartitionCount() partition}.
+ * {@link Enum} with the available types for the borders of a {@link io.github.mmm.sudoku.partition.Partition
+ * partition}.
  */
 public enum BorderType {
 
@@ -12,8 +12,8 @@ public enum BorderType {
   NONE,
 
   /**
-   * Thick bordering meaning that each {@link io.github.mmm.sudoku.child.Partitioning#getPartitionCount() partition} has
-   * a thick border to be visualised.
+   * Thick bordering meaning that each {@link io.github.mmm.sudoku.partition.Partition partition} has a thick border to
+   * be visualised.
    */
   THICK
 

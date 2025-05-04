@@ -4,11 +4,12 @@ package io.github.mmm.sudoku.partitioning;
 
 import io.github.mmm.sudoku.Sudoku;
 import io.github.mmm.sudoku.dimension.DimensionType;
+import io.github.mmm.sudoku.partition.Shape;
 
 /**
  * {@link Row} as {@link Partitioning}.
  */
-public class Row extends Partitioning {
+public class Row extends PartitioningByField {
 
   /**
    * The constructor.
@@ -24,5 +25,11 @@ public class Row extends Partitioning {
   public DimensionType getDimensionType() {
 
     return DimensionType.PRIME;
+  }
+
+  @Override
+  protected Shape getShape() {
+
+    return this.sudoku.getDimension().getRow();
   }
 }

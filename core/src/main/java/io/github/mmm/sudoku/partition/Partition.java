@@ -5,6 +5,7 @@ package io.github.mmm.sudoku.partition;
 import io.github.mmm.sudoku.Sudoku;
 import io.github.mmm.sudoku.child.SudokuContainer;
 import io.github.mmm.sudoku.common.AttributeComplete;
+import io.github.mmm.sudoku.common.AttributeSum;
 import io.github.mmm.sudoku.field.AbstractFieldGroup;
 import io.github.mmm.sudoku.field.Field;
 import io.github.mmm.sudoku.partition.impl.PartitionMapImpl;
@@ -27,15 +28,15 @@ import io.github.mmm.sudoku.partitioning.Sum;
  * <li>{@link Sum} #5</li>
  * </ul>
  */
-public class Partition extends AbstractFieldGroup implements SudokuContainer, AttributeComplete {
+public class Partition extends AbstractFieldGroup implements SudokuContainer, AttributeComplete, AttributeSum {
 
   private final Partitioning partitioning;
 
   private final int index;
 
-  private final int sum;
-
   private final boolean complete;
+
+  private final Shape shape;
 
   private PartitionMap partitionMap;
 
@@ -44,45 +45,25 @@ public class Partition extends AbstractFieldGroup implements SudokuContainer, At
    *
    * @param partitioning the {@link #getPartitioning() partitioning}.
    * @param index the {@link #getIndex() index}.
+   * @param shape the {@link #getShape() shape}.
    * @param fields the {@link #getField(int) fields}.
    */
-  public Partition(Partitioning partitioning, int index, Field... fields) {
-
-    this(partitioning, index, Field.UNDEFINED, fields);
-  }
-
-  /**
-   * The constructor.
-   *
-   * @param partitioning the {@link #getPartitioning() partitioning}.
-   * @param index the {@link #getIndex() index}.
-   * @param sum the {@link #getSum() sum}.
-   * @param fields the {@link #getField(int) fields}.
-   */
-  public Partition(Partitioning partitioning, int index, int sum, Field... fields) {
+  public Partition(Partitioning partitioning, int index, Shape shape, Field... fields) {
 
     super(fields);
     this.partitioning = partitioning;
     this.index = index;
-    this.sum = sum;
+    this.shape = shape;
     this.complete = (fields.length == partitioning.getSudoku().getSize());
+    int sum = -1;
+    if (shape != null) {
+      sum = shape.getSum();
+    }
     if (sum == Field.UNDEFINED) {
       assert this.complete;
     } else {
-      assert (fields.length > 1);
-      assert (sum >= minimumSum(fields.length));
+      assert (fields.length > 0);
     }
-  }
-
-  private int minimumSum(int length) {
-
-    int i = 1;
-    int minSum = 1;
-    while (i <= length) {
-      i++;
-      minSum += i;
-    }
-    return minSum;
   }
 
   /**
@@ -108,13 +89,13 @@ public class Partition extends AbstractFieldGroup implements SudokuContainer, At
     return this.index;
   }
 
-  /**
-   * @return the sum of the {@link Field#getValue() values} of the contained {@link #getField(int) fields} in case this
-   *         is a "sum-partition" of a "Sumdoku", otherwise {@code -1}.
-   */
+  @Override
   public int getSum() {
 
-    return this.sum;
+    if (this.shape == null) {
+      return -1;
+    }
+    return this.shape.getSum();
   }
 
   @Override
@@ -134,6 +115,14 @@ public class Partition extends AbstractFieldGroup implements SudokuContainer, At
       this.partitionMap = new PartitionMapImpl(this);
     }
     return this.partitionMap;
+  }
+
+  /**
+   * @return the {@link Shape} of this {@link Partition}.
+   */
+  public Shape getShape() {
+
+    return this.shape;
   }
 
   @Override

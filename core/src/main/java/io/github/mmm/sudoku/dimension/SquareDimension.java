@@ -22,14 +22,14 @@ public final class SquareDimension extends AbstractDimension {
   /** {@link SquareDimension} for with {@link #getBoxSize() box-size} of {@code 4} for a 16x16 {@link Sudoku}. */
   public static final SquareDimension D16 = new SquareDimension(4);
 
-  private SquareDimension(int base) {
+  private SquareDimension(int boxSize) {
 
-    this(base, null);
+    this(boxSize, null);
   }
 
-  private SquareDimension(int base, List<String> alphabet) {
+  private SquareDimension(int boxSize, List<String> alphabet) {
 
-    super(base, base, base * base, alphabet);
+    super(boxSize, boxSize, boxSize * boxSize, alphabet);
   }
 
   @Override
@@ -39,13 +39,13 @@ public final class SquareDimension extends AbstractDimension {
   }
 
   /**
-   * @param base the {@link #getBase() base}.
+   * @param boxSize the {@link #getBoxSize() box-size}.
    * @param alphabet the custom {@link #getAlphabet() alphabet}.
    * @return the new {@link SquareDimension}.
    */
-  public static SquareDimension of(int base, List<String> alphabet) {
+  public static SquareDimension of(int boxSize, List<String> alphabet) {
 
-    return new SquareDimension(base, alphabet);
+    return new SquareDimension(boxSize, alphabet);
   }
 
 }

@@ -4,6 +4,7 @@ import io.github.mmm.sudoku.Sudoku;
 import io.github.mmm.sudoku.dimension.AbstractDimension;
 import io.github.mmm.sudoku.dimension.PrimeDimension;
 import io.github.mmm.sudoku.partition.Partition;
+import io.github.mmm.sudoku.partition.Shape;
 import io.github.mmm.sudoku.partitioning.Jigsaw;
 import io.github.mmm.sudoku.partitioning.Region;
 
@@ -15,12 +16,11 @@ public class JigsawBuilder extends RegionBuilder {
   /**
    * The constructor.
    *
-   * @param seed the seed to specify deterministic {@link Jigsaw} {@link Partition}s.
+   * @param shapes the {@link Shape}s of the {@link Jigsaw} {@link Partition}s.
    */
-  public JigsawBuilder(int seed) {
+  public JigsawBuilder(Shape[] shapes) {
 
-    // TODO
-    super(null);
+    super((s, i) -> new Jigsaw(s, i, shapes));
   }
 
   /**

@@ -4,6 +4,7 @@ package io.github.mmm.sudoku.partitioning;
 
 import io.github.mmm.sudoku.Sudoku;
 import io.github.mmm.sudoku.field.Field;
+import io.github.mmm.sudoku.partition.Shape;
 
 /**
  * Implementation of {@link Region} as square box for a normal {@link Sudoku}. In a classic {@link Sudoku} the
@@ -124,7 +125,7 @@ public final class Box extends Region {
    */
   public Box(Sudoku sudoku, int index) {
 
-    super(sudoku, index, Box::getField);
+    super(sudoku, index, (PartitionFunctionByField) Box::getField);
   }
 
   private static Field getField(Sudoku sudoku, int partitionIndex, int fieldIndex) {
@@ -138,6 +139,12 @@ public final class Box extends Region {
     int x = x0 + (field % boxWidth);
     int y = y0 + (field / boxWidth);
     return sudoku.getField(x, y);
+  }
+
+  @Override
+  protected Shape getShape() {
+
+    return this.sudoku.getDimension().getBox();
   }
 
 }

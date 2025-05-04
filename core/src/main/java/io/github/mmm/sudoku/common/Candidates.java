@@ -84,7 +84,7 @@ public class Candidates {
 
   /**
    * @return the number of distinct {@link #include(int) included} {@link #has(int) candidates}. In other words the
-   *         cardinality or {@link Integer#bitCount(int) bit count} of the internal {@link #getEncodedBitValue() bits}.
+   *         {@link Integer#bitCount(int) bit count} of the {@link #getEncodedBitValue() encoded bits}.
    */
   public int getInclusionCount() {
 
@@ -138,6 +138,32 @@ public class Candidates {
   }
 
   /**
+   * @return the lowest {@link #has(int) candidate} or {@code -1} in case of no candidate.
+   */
+  public int getLowestCandidate() {
+
+    if (this.bits == 0) {
+      return -1;
+    }
+    int result = 1;
+    int myBits = this.bits;
+    while ((myBits & 1) == 0) {
+      result++;
+      myBits = myBits >> 1;
+    }
+    return result;
+  }
+
+  /**
+   * @return {@code true} if empty (for {@link #ofNone()} and if {@link #getInclusionCount()} is {@code 0}),
+   *         {@code false} otherwise.
+   */
+  public boolean isEmpty() {
+
+    return this.bits == 0;
+  }
+
+  /**
    * @return the internal bit-encoded value of the {@link #include(int) included} {@link #has(int) candidates}.
    */
   public int getEncodedBitValue() {
@@ -174,6 +200,15 @@ public class Candidates {
       return CACHE[bits];
     }
     return new Candidates(bits);
+  }
+
+  /**
+   * @param value the single value to {@link #include(int) include}.
+   * @return the resulting {@link Candidates}.
+   */
+  public static Candidates ofValue(int value) {
+
+    return ofNone().include(value);
   }
 
   /**

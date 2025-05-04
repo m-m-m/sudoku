@@ -4,7 +4,8 @@ import io.github.mmm.sudoku.common.Candidates;
 import io.github.mmm.sudoku.field.Field;
 
 /**
- * {@link HintStep} applying to multiple {@link Field}s.
+ * {@link HintStepFields} to {@link Candidates#exclude(Candidates) exclude} a given set of {@link Candidates} in the
+ * {@link Field}s.
  */
 public final class HintStepFieldsExcludeCandidates extends HintStepFields {
 

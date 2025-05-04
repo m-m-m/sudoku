@@ -151,6 +151,14 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
     }
   }
 
+  /**
+   * @return the {@link AbstractDimension} of this {@link Sudoku}.
+   */
+  public AbstractDimension getDimension() {
+
+    return this.dimension;
+  }
+
   @Override
   public int getSize() {
 

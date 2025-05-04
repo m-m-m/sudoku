@@ -10,7 +10,7 @@ import io.github.mmm.sudoku.partitioning.Row;
 /**
  * {@link Enum} with the available types of a {@link Dimension}.
  *
- * @see Attribute#getType
+ * @see io.github.mmm.sudoku.common.AttributeDimensionType#getDimensionType()
  */
 public enum DimensionType {
 

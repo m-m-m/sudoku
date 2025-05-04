@@ -4,7 +4,7 @@ package io.github.mmm.sudoku.partitioning;
 
 import io.github.mmm.sudoku.Sudoku;
 import io.github.mmm.sudoku.dimension.DimensionType;
-import io.github.mmm.sudoku.field.Field;
+import io.github.mmm.sudoku.partition.Shape;
 import io.github.mmm.sudoku.style.ColorType;
 
 /** {@link Jigsaw} {@link Region}. */
@@ -14,17 +14,13 @@ public class Jigsaw extends Region {
    * The constructor.
    *
    * @param sudoku the {@link #getSudoku() sudoku}.
+   * @param index the {@link #getIndex() partitioning index}. Should be {@code 3}.
+   * @param shapes the {@link Shape}s.
    */
-  public Jigsaw(Sudoku sudoku, int index) {
+  public Jigsaw(Sudoku sudoku, int index, Shape... shapes) {
 
-    super(sudoku, index, Jigsaw::getField);
-  }
-
-  private static Field getField(Sudoku sudoku, int partitionIndex, int fieldIndex) {
-
-    // TODO: Jigsaw partions are not define in a unique way
-    // take an index/seed as additional parameter to identify and compute partitions?
-    return null;
+    super(sudoku, index, (p) -> createPartitions(p, shapes));
+    assert (shapes.length == sudoku.getSize());
   }
 
   @Override

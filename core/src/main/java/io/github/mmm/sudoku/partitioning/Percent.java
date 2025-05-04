@@ -129,7 +129,7 @@ public class Percent extends Layer {
    */
   public Percent(Sudoku sudoku, int index) {
 
-    super(sudoku, index, new PartitionFunction() {
+    super(sudoku, index, new PartitionFunctionByField() {
 
       @Override
       public int getPartitionCount(Dimension dimension) {

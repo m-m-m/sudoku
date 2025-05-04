@@ -23,7 +23,7 @@ public class Color extends Layer {
    */
   public Color(Sudoku sudoku, int index) {
 
-    super(sudoku, index, Color::getField);
+    super(sudoku, index, (PartitionFunctionByField) Color::getField);
   }
 
   private static Field getField(Sudoku sudoku, int partitionIndex, int fieldIndex) {

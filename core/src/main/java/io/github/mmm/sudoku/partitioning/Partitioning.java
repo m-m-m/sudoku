@@ -13,6 +13,7 @@ import io.github.mmm.sudoku.dimension.Dimension;
 import io.github.mmm.sudoku.dimension.DimensionType;
 import io.github.mmm.sudoku.field.Field;
 import io.github.mmm.sudoku.partition.Partition;
+import io.github.mmm.sudoku.partition.Shape;
 import io.github.mmm.sudoku.style.BorderType;
 import io.github.mmm.sudoku.style.ColorType;
 
@@ -38,9 +39,9 @@ import io.github.mmm.sudoku.style.ColorType;
  * Every {@link Sudoku} has one or more additional {@link Partitioning}s. A normal {@link Sudoku} has {@link Box} as
  * additional {@link Partitioning}. Special {@link Sudoku#getType() types} like {@link Hyper} add a fourth {@link Layer}
  * typically visualised by {@link Partitioning#getColorType() color}. However, there are also {@link Sudoku#getType()
- * types} like {@link io.github.mmm.sudoku.JigsawSudoku} that use irregular shapes instead of {@link Box boxes} and this
- * also allows to have a {@link Dimension} that is <b>not</b> {@link Sudoku#isSquare() regular} such as e.g. a 5x5
- * {@link Sudoku} board that can not be split into {@link Box}es since 5 is not a square number.<br>
+ * types} like {@link Jigsaw} that use irregular {@link Shape}s instead of {@link Box boxes} and this also allows to
+ * have a {@link Dimension} that is <b>not</b> square such as e.g. a 5x5 {@link Sudoku} board that can not be split into
+ * {@link Box}es since 5 is not a square number.<br>
  * As you can see {@link Partitioning} is a very generic but powerful concept that allows to implement many
  * {@link Sudoku#getType() types} of {@link Sudoku}s easily without the need to write much extra code.<br>
  * Also a {@link Sum}Doku is possible where no {@link Field#isGiven() clues are given} but only the
@@ -62,26 +63,9 @@ public abstract class Partitioning extends SudokuChildObject
    *
    * @param sudoku the {@link #getSudoku() sudoku}.
    * @param index the {@link #getIndex() index}.
-   * @param function the {@link PartitionFunction}.
+   * @param function the {@link PartitionFunctionByField}.
    */
   public Partitioning(Sudoku sudoku, int index, PartitionFunction function) {
-
-    this(sudoku, index, function, null);
-  }
-
-  /**
-   * The constructor.
-   *
-   * @param sudoku the {@link #getSudoku() sudoku}.
-   * @param index the {@link #getIndex() index}.
-   * @param partitions the pre-defined {@link #getPartition(int) partitions}.
-   */
-  protected Partitioning(Sudoku sudoku, int index, Partition[] partitions) {
-
-    this(sudoku, index, null, partitions);
-  }
-
-  private Partitioning(Sudoku sudoku, int index, PartitionFunction function, Partition[] partitions) {
 
     super(sudoku);
     switch (getDimensionType()) {
@@ -101,15 +85,7 @@ public abstract class Partitioning extends SudokuChildObject
       }
     }
     this.index = index;
-    if (partitions == null) {
-      this.partitions = new Partition[function.getPartitionCount(sudoku)];
-      for (int partitionIndex = 1; partitionIndex <= this.partitions.length; partitionIndex++) {
-        this.partitions[partitionIndex - 1] = function.createPartition(this, partitionIndex);
-      }
-    } else {
-      assert (function == null);
-      this.partitions = partitions;
-    }
+    this.partitions = function.createPartitions(this);
   }
 
   /**
@@ -188,6 +164,14 @@ public abstract class Partitioning extends SudokuChildObject
     return BorderType.NONE;
   }
 
+  /**
+   * @return the fixed {@link Shape} of all {@link Partition}s or {@code null} if not fixed.
+   */
+  protected Shape getShape() {
+
+    return null;
+  }
+
   @Override
   public String toString() {
 
@@ -195,20 +179,34 @@ public abstract class Partitioning extends SudokuChildObject
   }
 
   /**
-   * A {@link PartitionFunction} allows to implement a {@link Partitioning} easier by implementing
-   * {@link #getField(Sudoku, int, int)} as a lambda.
+   * A {@link PartitionFunction} creates the {@link Partition}s of a {@link Partitioning}.
    */
   @FunctionalInterface
   public interface PartitionFunction {
 
     /**
-     * @param dimension the {@link Dimension}.
-     * @return the number of actual partitions available for this {@link Partitioning}. Typically the
-     *         {@link Sudoku#getSize() size} of the {@link Sudoku} but may differ for special {@link Partitioning}s.
+     * @param partitioning the owning {@link Partitioning}.
+     * @return the created {@link Partition}s.
      */
-    default int getPartitionCount(Dimension dimension) {
+    Partition[] createPartitions(Partitioning partitioning);
 
-      return dimension.getSize();
+  }
+
+  /**
+   * A {@link PartitionFunctionByField} allows to implement a {@link Partitioning} easier by implementing
+   * {@link #getField(Sudoku, int, int)} as a lambda.
+   */
+  @FunctionalInterface
+  public interface PartitionFunctionByField extends PartitionFunction {
+
+    @Override
+    default Partition[] createPartitions(Partitioning partitioning) {
+
+      Partition[] partitions = new Partition[getPartitionCount(partitioning.getSudoku())];
+      for (int partitionIndex = 1; partitionIndex <= partitions.length; partitionIndex++) {
+        partitions[partitionIndex - 1] = createPartition(partitioning, partitionIndex);
+      }
+      return partitions;
     }
 
     /**
@@ -223,8 +221,19 @@ public abstract class Partitioning extends SudokuChildObject
     }
 
     /**
+     * @param dimension the {@link Dimension}.
+     * @return the number of actual partitions available for this {@link Partitioning}. Typically the
+     *         {@link Sudoku#getSize() size} of the {@link Sudoku} but may differ for special {@link Partitioning}s.
+     */
+    default int getPartitionCount(Dimension dimension) {
+
+      return dimension.getSize();
+    }
+
+    /**
      * @param partitioning the owning {@link Partitioning}.
      * @param partitionIndex the {@link Partition#getIndex() partition index}.
+     * @param shape the {@link Partition#getShape() shape}.
      * @return the created {@link Partition}.
      */
     default Partition createPartition(Partitioning partitioning, int partitionIndex) {
@@ -233,7 +242,7 @@ public abstract class Partitioning extends SudokuChildObject
       for (int fieldIndex = 1; fieldIndex <= fields.length; fieldIndex++) {
         fields[fieldIndex - 1] = getField(partitioning.getSudoku(), partitionIndex, fieldIndex);
       }
-      return new Partition(partitioning, partitionIndex, Field.UNDEFINED, fields);
+      return new Partition(partitioning, partitionIndex, partitioning.getShape(), fields);
     }
 
     /**
@@ -246,10 +255,10 @@ public abstract class Partitioning extends SudokuChildObject
   }
 
   /**
-   * {@link PartitionFunction} for a single {@link Partition}.
+   * {@link PartitionFunctionByField} for a single {@link Partition}.
    */
   @FunctionalInterface
-  public interface SinglePartitionFunction extends PartitionFunction {
+  public interface SinglePartitionFunction extends PartitionFunctionByField {
 
     @Override
     default int getPartitionCount(Dimension dimension) {

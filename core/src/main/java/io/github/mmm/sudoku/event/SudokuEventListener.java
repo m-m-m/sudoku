@@ -7,6 +7,6 @@ import io.github.mmm.event.EventListener;
 /**
  * Interface for a listener of {@link SudokuEvent}s.
  */
-public interface SudokuEventListener extends EventListener<SudokuEvent> {
+public interface SudokuEventListener extends EventListener<SudokuEvent<?>> {
 
 }

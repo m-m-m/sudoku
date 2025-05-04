@@ -141,4 +141,10 @@ public abstract class X extends Layer {
     return ColorType.SAME;
   }
 
+  @Override
+  public boolean isComplete() {
+
+    return false;
+  }
+
 }

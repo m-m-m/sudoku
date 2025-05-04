@@ -5,21 +5,23 @@ package io.github.mmm.sudoku.partitioning;
 import io.github.mmm.sudoku.Sudoku;
 import io.github.mmm.sudoku.dimension.DimensionType;
 import io.github.mmm.sudoku.partition.Partition;
+import io.github.mmm.sudoku.partition.SumShape;
 import io.github.mmm.sudoku.style.BorderType;
+import io.github.mmm.sudoku.style.ColorType;
 
 /** {@link Sum} {@link Partitioning}. */
-public class Sum extends FlexiblePartitioning {
+public class Sum extends Layer {
 
   /**
    * The constructor.
    *
    * @param sudoku the {@link #getSudoku() sudoku}.
    * @param index the {@link #getIndex() index}.
-   * @param partitions the {@link Partition#getSum() sum}-{@link Partition}s.
+   * @param sums the {@link SumShape}s to build the {@link Partition}s from.
    */
-  public Sum(Sudoku sudoku, int index, Partition... partitions) {
+  public Sum(Sudoku sudoku, int index, SumShape... sums) {
 
-    super(sudoku, index, partitions);
+    super(sudoku, index, p -> createPartitions(p, sums));
   }
 
   @Override
@@ -35,8 +37,15 @@ public class Sum extends FlexiblePartitioning {
   }
 
   @Override
+  public ColorType getColorType() {
+
+    return ColorType.NONE;
+  }
+
+  @Override
   public BorderType getBorderType() {
 
+    // TODO
     return BorderType.THICK;
   }
 

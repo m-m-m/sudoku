@@ -1,10 +1,10 @@
 package io.github.mmm.sudoku.builder;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import io.github.mmm.sudoku.partition.Partition;
+import io.github.mmm.sudoku.partition.SumShape;
 import io.github.mmm.sudoku.partitioning.FlexiblePartitioning.LayerFactory;
 import io.github.mmm.sudoku.partitioning.Layer;
+import io.github.mmm.sudoku.partitioning.Sum;
 
 /**
  * {@link Builder} for {@link Layer}.
@@ -13,13 +13,21 @@ public class SumBuilder extends IntermediateBuilder<Builder> {
 
   final LayerBuilder layerBuilder;
 
-  final List<LayerFactory> sums;
-
   SumBuilder(LayerBuilder layerBuilder) {
 
     super();
     this.layerBuilder = layerBuilder;
-    this.sums = new ArrayList<>();
+  }
+
+  /**
+   * @param sums the {@link SumShape}s for the {@link Sum} {@link Partition}s.
+   * @return the {@link Builder} for fluent-API calls.
+   */
+  public Builder withSums(SumShape... sums) {
+
+    LayerFactory sumFactory = (s, i) -> new Sum(s, i, sums);
+    this.layerBuilder.layerFactories.add(sumFactory);
+    return next();
   }
 
   @Override
