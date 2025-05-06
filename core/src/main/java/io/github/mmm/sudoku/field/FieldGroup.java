@@ -6,12 +6,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import io.github.mmm.base.collection.SizedIterable;
 import io.github.mmm.sudoku.Sudoku;
+import io.github.mmm.sudoku.common.Candidates;
 
 /**
  * Interface for a group of {@link Field}s.
  */
-public interface FieldGroup extends Iterable<Field> {
+public interface FieldGroup extends SizedIterable<Field> {
 
   /** The empty {@link FieldGroup}. */
   FieldGroup EMPTY = EmptyFieldGroup.INSTANCE;
@@ -21,6 +23,12 @@ public interface FieldGroup extends Iterable<Field> {
    *         {@link io.github.mmm.sudoku.partition.Partition} the same as {@link Sudoku#getSize() sudoku size}.
    */
   int getFieldCount();
+
+  @Override
+  default int getSize() {
+
+    return getFieldCount();
+  }
 
   /**
    * @param fieldIndex the index of the requested {@link Field} in the range from {@code 1} to
@@ -45,17 +53,40 @@ public interface FieldGroup extends Iterable<Field> {
    */
   default int indexOf(Field field) {
 
-    int count = getFieldCount();
-    for (int i = 1; i <= count; i++) {
-      if (getField(i) == field) {
+    int i = 1;
+    for (Field f : this) {
+      if (f == field) {
         return i;
       }
+      i++;
     }
     return -1;
   }
 
   /**
-   * @return this group as {@link Field} array.
+   * @return the {@link Candidates#union(Candidates) union} of all {@link Candidates} in this group.
+   */
+  default Candidates uniteCandidates() {
+
+    return uniteCandidates(Candidates.ofNone());
+  }
+
+  /**
+   * @param candidates the {@link Candidates} to {@link Candidates#union(Candidates) start the union} with.
+   * @return {@link Candidates#union(Candidates) union} of all {@link Candidates} in this group and the given
+   *         {@link Candidates}.
+   */
+  default Candidates uniteCandidates(Candidates candidates) {
+
+    Candidates result = candidates;
+    for (Field field : this) {
+      result = result.union(field.getCandidates());
+    }
+    return result;
+  }
+
+  /**
+   * @return this group as {@link Field} array. Do not modify the array.
    */
   default Field[] toArray() {
 
@@ -68,7 +99,7 @@ public interface FieldGroup extends Iterable<Field> {
 
   /**
    * @param fields the {@link Iterable} of {@link Field}s.
-   * @return the array of {@link Field}s.
+   * @return the array of {@link Field}s. Do not modify the array.
    */
   static Field[] toArray(Iterable<Field> fields) {
 

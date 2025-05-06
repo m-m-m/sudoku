@@ -281,7 +281,7 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
       for (Partitioning partitioning : this.partitionings) {
         Partition partition = field.getPartition(partitioning);
         if (partition != null) {
-          LOG.debug("Updating partition {} of {}", partition.getIndex(), partitioning.getName());
+          LOG.trace("Updating partition {} of {}", partition.getIndex(), partitioning.getName());
           for (Field neighbour : partition) {
             if ((neighbour != field) && neighbour.hasCandidate(value)) {
               if (neighbour.hasValue()) {
@@ -465,7 +465,7 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
   @Override
   public boolean fireEvent(SudokuEvent<?> event) {
 
-    LOG.debug("{}", event);
+    LOG.trace("{}", event);
     if (event instanceof SudokuChangeEvent<?> changeEvent) {
       this.modificationCounter++;
       if (this.currentChanges != null) {

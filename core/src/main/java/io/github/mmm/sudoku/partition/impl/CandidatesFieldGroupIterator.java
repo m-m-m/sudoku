@@ -5,16 +5,16 @@ package io.github.mmm.sudoku.partition.impl;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import io.github.mmm.sudoku.field.AggregatedFieldGroup;
+import io.github.mmm.sudoku.field.CandidatesFieldGroup;
 
 /**
- * Implementation of {@link Iterator} for {@link AggregatedFieldGroupImpl}.
+ * Implementation of {@link Iterator} for {@link CandidatesFieldGroupImpl}.
  */
-public class AggregatedFieldGroupIterator implements Iterator<AggregatedFieldGroup> {
+public class CandidatesFieldGroupIterator implements Iterator<CandidatesFieldGroup> {
 
-  private AggregatedFieldGroupImpl next;
+  private CandidatesFieldGroupImpl next;
 
-  AggregatedFieldGroupIterator(AggregatedFieldGroupImpl next) {
+  CandidatesFieldGroupIterator(CandidatesFieldGroupImpl next) {
 
     super();
     this.next = next;
@@ -27,12 +27,12 @@ public class AggregatedFieldGroupIterator implements Iterator<AggregatedFieldGro
   }
 
   @Override
-  public AggregatedFieldGroup next() {
+  public CandidatesFieldGroup next() {
 
     if (this.next == null) {
       throw new NoSuchElementException();
     }
-    AggregatedFieldGroup result = this.next;
+    CandidatesFieldGroup result = this.next;
     this.next = this.next.next;
     return result;
   }

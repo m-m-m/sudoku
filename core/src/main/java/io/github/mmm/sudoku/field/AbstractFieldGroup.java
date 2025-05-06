@@ -1,3 +1,5 @@
+/* Copyright (c) The m-m-m Team, Licensed under the Apache License, Version 2.0
+ * http://www.apache.org/licenses/LICENSE-2.0 */
 package io.github.mmm.sudoku.field;
 
 import java.util.Iterator;
@@ -41,6 +43,12 @@ public abstract class AbstractFieldGroup implements FieldGroup {
   public Iterator<Field> iterator() {
 
     return new ArrayIterator<>(this.fields);
+  }
+
+  @Override
+  public Field[] toArray() {
+
+    return this.fields; // performance boost, nobody should modify the result!
   }
 
 }

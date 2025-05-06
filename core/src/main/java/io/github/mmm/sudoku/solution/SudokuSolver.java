@@ -2,10 +2,14 @@ package io.github.mmm.sudoku.solution;
 
 import io.github.mmm.sudoku.Sudoku;
 import io.github.mmm.sudoku.solution.strategy.SolutionStrategy;
+import io.github.mmm.sudoku.solution.strategy.SolutionStrategyHiddenPair;
 import io.github.mmm.sudoku.solution.strategy.SolutionStrategyHiddenSingle;
+import io.github.mmm.sudoku.solution.strategy.SolutionStrategyHiddenTriplet;
 import io.github.mmm.sudoku.solution.strategy.SolutionStrategyNakedPair;
 import io.github.mmm.sudoku.solution.strategy.SolutionStrategyNakedSingle;
+import io.github.mmm.sudoku.solution.strategy.SolutionStrategyNakedTriplet;
 import io.github.mmm.sudoku.solution.strategy.SolutionStrategyPartitionIntersection;
+import io.github.mmm.sudoku.solution.strategy.SolutionStrategyXWing;
 
 /**
  * Solver for a {@link Sudoku}.
@@ -51,7 +55,9 @@ public class SudokuSolver implements Solver {
   public static SudokuSolver of() {
 
     return new SudokuSolver(SolutionStrategyNakedSingle.INSTANCE, SolutionStrategyHiddenSingle.INSTANCE,
-        SolutionStrategyNakedPair.INSTANCE, SolutionStrategyPartitionIntersection.INSTANCE);
+        SolutionStrategyNakedPair.INSTANCE, SolutionStrategyHiddenPair.INSTANCE, SolutionStrategyNakedTriplet.INSTANCE,
+        SolutionStrategyPartitionIntersection.INSTANCE, SolutionStrategyHiddenTriplet.INSTANCE,
+        SolutionStrategyXWing.INSTANCE);
   }
 
 }

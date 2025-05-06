@@ -2,13 +2,12 @@
  * http://www.apache.org/licenses/LICENSE-2.0 */
 package io.github.mmm.sudoku.partition.impl;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
 
 import io.github.mmm.sudoku.common.Candidates;
 import io.github.mmm.sudoku.field.AggregatedFieldGroup;
+import io.github.mmm.sudoku.field.CandidatesFieldGroup;
 import io.github.mmm.sudoku.field.Field;
-import io.github.mmm.sudoku.field.FieldGroup;
 import io.github.mmm.sudoku.partition.Partition;
 import io.github.mmm.sudoku.partition.PartitionMap;
 
@@ -23,7 +22,7 @@ public class PartitionMapImpl implements PartitionMap {
 
   private AggregatedFieldGroupImpl[] counts;
 
-  private TupleIterable[] tuples;
+  private CandidatesFieldGroupIterable[] tuples;
 
   /**
    * The constructor.
@@ -50,77 +49,12 @@ public class PartitionMapImpl implements PartitionMap {
   }
 
   @Override
-  public FieldGroup getNakedTuple(int n) {
-
-    // actually n == size also does not make sense...
-    if ((n < 1) || (n > this.partition.getSudoku().getSize())) {
-      throw new IndexOutOfBoundsException(n);
-    }
-    Map<Candidates, FieldGroupImpl> map = null;
-    if (n >= 2) {
-      map = new HashMap<>();
-    }
-    for (Field field : this.partition) {
-      int remainingCandidates = field.getIncludedCandidateCount();
-      if (remainingCandidates == n) {
-        if (n == 1) {
-          return new FieldGroupImpl(field);
-        } else {
-          @SuppressWarnings("null")
-          FieldGroupImpl group = map.computeIfAbsent(field.getCandidates(), c -> new FieldGroupImpl());
-          group.add(field);
-          if (group.getFieldCount() == n) {
-            return group;
-          }
-        }
-      }
-    }
-    return null;
-  }
-
-  @Override
-  public Iterable<AggregatedFieldGroup> getByTuples(int n) {
-
-    if ((n < 1) || (n > this.partition.getSudoku().getSize())) {
-      throw new IndexOutOfBoundsException(n);
-    }
-    if (this.tuples == null) {
-      this.tuples = computeTuples();
-    }
-    return this.tuples[n - 1];
-  }
-
-  @Override
   public AggregatedFieldGroup getByCandidate(int candidate) {
 
     if ((candidate < 1) || (candidate > this.partition.getSudoku().getSize())) {
       throw new IndexOutOfBoundsException(candidate);
     }
     return getCounts()[candidate - 1];
-  }
-
-  private TupleIterable[] computeTuples() {
-
-    int size = this.partition.getSudoku().getSize();
-    TupleIterable[] result = new TupleIterable[size];
-    for (AggregatedFieldGroupImpl group : getCounts()) {
-      int fieldCount = group.getFieldCount();
-      int i = fieldCount - 1;
-      if (i >= 0) {
-        if (result[i] == null) {
-          result[i] = new TupleIterable(group);
-        } else {
-          group.next = result[i].first;
-          result[i].first = group;
-        }
-      }
-    }
-    for (int i = 0; i < result.length; i++) {
-      if (result[i] == null) {
-        result[i] = TupleIterable.EMPTY;
-      }
-    }
-    return result;
   }
 
   private AggregatedFieldGroupImpl[] getCounts() {
@@ -135,17 +69,19 @@ public class PartitionMapImpl implements PartitionMap {
 
     int size = this.partition.getSudoku().getSize();
     AggregatedFieldGroupImpl[] result = new AggregatedFieldGroupImpl[size];
-    for (Field field : this.partition) {
+    int fieldCount = this.partition.getFieldCount();
+    for (int fieldIndex = 1; fieldIndex <= fieldCount; fieldIndex++) {
+      Field field = this.partition.getField(fieldIndex);
       if (field.hasValue()) {
         int value = field.getValue();
-        result[value - 1] = new AggregatedFieldGroupImpl(value, field);
+        result[value - 1] = new AggregatedFieldGroupImpl(this.partition, value, fieldIndex);
       } else {
         for (int candidate = 1; candidate <= size; candidate++) {
           if (field.hasCandidate(candidate)) {
             if (result[candidate - 1] == null) {
-              result[candidate - 1] = new AggregatedFieldGroupImpl(candidate);
+              result[candidate - 1] = new AggregatedFieldGroupImpl(this.partition, candidate);
             }
-            result[candidate - 1].add(field);
+            result[candidate - 1].add(fieldIndex);
           }
         }
       }
@@ -153,4 +89,57 @@ public class PartitionMapImpl implements PartitionMap {
     return result;
   }
 
+  @Override
+  public Iterable<CandidatesFieldGroup> getByCandidatesCount(int count) {
+
+    if ((count < 2) || (count >= this.partition.getSudoku().getSize())) {
+      return Collections.emptySet();
+    }
+    return getTuples()[count - 2];
+  }
+
+  @Override
+  public CandidatesFieldGroup getFirstByCandidatesCount(int count) {
+
+    if ((count < 2) || (count >= this.partition.getSudoku().getSize())) {
+      return null;
+    }
+    CandidatesFieldGroupIterable iterable = getTuples()[count - 2];
+    return iterable.first;
+  }
+
+  private CandidatesFieldGroupIterable[] getTuples() {
+
+    if (this.tuples == null) {
+      this.tuples = computeTuples();
+    }
+    return this.tuples;
+  }
+
+  private CandidatesFieldGroupIterable[] computeTuples() {
+
+    int size = this.partition.getSudoku().getSize();
+    CandidatesFieldGroupIterable[] result = new CandidatesFieldGroupIterable[size - 2];
+    for (int fieldIndex = 1; fieldIndex <= size; fieldIndex++) {
+      Field field = this.partition.getField(fieldIndex);
+      if (!field.hasValue()) {
+        Candidates candidates = field.getCandidates();
+        int count = candidates.getInclusionCount();
+        if ((count >= 2) && (count < size)) {
+          CandidatesFieldGroupIterable iterable = result[count - 2];
+          if (iterable == null) {
+            iterable = new CandidatesFieldGroupIterable(null);
+            result[count - 2] = iterable;
+          }
+          iterable.add(this.partition, candidates, fieldIndex);
+        }
+      }
+    }
+    for (int i = 0; i < result.length; i++) {
+      if (result[i] == null) {
+        result[i] = CandidatesFieldGroupIterable.EMPTY;
+      }
+    }
+    return result;
+  }
 }

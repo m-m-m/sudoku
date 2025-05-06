@@ -64,7 +64,7 @@ public class SolutionStrategyPartitionIntersection extends SolutionStrategyByPar
             List<Field> fields = new ArrayList<>();
             addFields(fields, intersection, partition, value);
             if (fields.size() > 0) {
-              return hint(mark(partition), mark(group), exclude(fields, Candidates.ofValues(value)));
+              return hint(mark(partition), mark(group), exclude(Candidates.ofValue(value), fields));
             }
           }
         }

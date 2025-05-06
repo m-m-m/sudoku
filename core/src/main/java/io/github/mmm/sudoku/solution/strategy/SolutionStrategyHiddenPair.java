@@ -3,14 +3,14 @@
 package io.github.mmm.sudoku.solution.strategy;
 
 /**
- * {@link SolutionStrategy} to find a naked pair.
+ * {@link SolutionStrategy} to find a hidden pair.
  */
-public class SolutionStrategyNakedPair extends SolutionStrategyNakedTuple {
+public class SolutionStrategyHiddenPair extends SolutionStrategyHiddenTuple {
 
   /** The singleton instance. */
-  public static final SolutionStrategyNakedPair INSTANCE = new SolutionStrategyNakedPair();
+  public static final SolutionStrategyHiddenPair INSTANCE = new SolutionStrategyHiddenPair();
 
-  private SolutionStrategyNakedPair() {
+  private SolutionStrategyHiddenPair() {
 
     super(2);
   }
@@ -18,13 +18,13 @@ public class SolutionStrategyNakedPair extends SolutionStrategyNakedTuple {
   @Override
   public int getDifficulty() {
 
-    return 10;
+    return 15;
   }
 
   @Override
   public String getName() {
 
-    return "naked pair";
+    return "hidden pair";
   }
 
 }

@@ -25,6 +25,7 @@ public class CandidatesTest extends Assertions {
     assertThat(candidates.toIncludedArray()).isEmpty();
     assertThat(candidates.toExcludedArray(9)).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9);
     assertThat(candidates.getLowestCandidate()).isEqualTo(-1);
+    assertThat(candidates.getCandidate(2)).isEqualTo(-1);
     assertThat(candidates).hasToString("{}");
   }
 
@@ -41,6 +42,12 @@ public class CandidatesTest extends Assertions {
     assertThat(candidates.toIncludedArray()).containsExactly(1, 3, 5, 7, 9);
     assertThat(candidates.toExcludedArray(9)).containsExactly(2, 4, 6, 8);
     assertThat(candidates.getLowestCandidate()).isEqualTo(1);
+    assertThat(candidates.getCandidate(1)).isEqualTo(1);
+    assertThat(candidates.getCandidate(2)).isEqualTo(3);
+    assertThat(candidates.getCandidate(3)).isEqualTo(5);
+    assertThat(candidates.getCandidate(4)).isEqualTo(7);
+    assertThat(candidates.getCandidate(5)).isEqualTo(9);
+    assertThat(candidates.getCandidate(6)).isEqualTo(-1);
     assertThat(candidates).hasToString("{1,3,5,7,9}");
   }
 

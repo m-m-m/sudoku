@@ -2,9 +2,10 @@ package io.github.mmm.sudoku.partition;
 
 import io.github.mmm.sudoku.Sudoku;
 import io.github.mmm.sudoku.common.AttributeModificationCounter;
+import io.github.mmm.sudoku.common.Candidates;
 import io.github.mmm.sudoku.field.AggregatedFieldGroup;
+import io.github.mmm.sudoku.field.CandidatesFieldGroup;
 import io.github.mmm.sudoku.field.Field;
-import io.github.mmm.sudoku.field.FieldGroup;
 import io.github.mmm.sudoku.solution.Hint;
 
 /**
@@ -20,13 +21,6 @@ public interface PartitionMap extends AttributeModificationCounter {
   Partition getPartition();
 
   /**
-   * @param n the tuple size. E.g. {@code 1} to find (hidden) singles, {@code 2} for pairs or {@code 3} for tripplets.
-   * @return an {@link Iterable} of {@link AggregatedFieldGroup}s per {@link AggregatedFieldGroup#getCandidate()
-   *         candidate} {@link Field#getValue() value}.
-   */
-  Iterable<AggregatedFieldGroup> getByTuples(int n);
-
-  /**
    * @param candidate the {@link Field#hasCandidate(int) candidate}.
    * @return the {@link AggregatedFieldGroup} with all {@link Field}s having this {@link Field#hasCandidate(int)
    *         candidate}.
@@ -34,10 +28,19 @@ public interface PartitionMap extends AttributeModificationCounter {
   AggregatedFieldGroup getByCandidate(int candidate);
 
   /**
-   * @param n the number of remaining {@link Field#hasCandidate(int) candidates}. E.g. {@code 1} to find naked (obvious)
-   *        singles, {@code 2} to find naked pairs, etc.
-   * @return the {@link FieldGroup} with the first naked tuple.
+   * @param count the {@link Candidates#getInclusionCount() inclusion count}. Should be in the range from {@code 2} to
+   *        <code>{@link Sudoku#getSize()}-1</code>.
+   * @return an {@link Iterable} of {@link CandidatesFieldGroup}s per {@link CandidatesFieldGroup#getCandidates()
+   *         candidates}.
    */
-  FieldGroup getNakedTuple(int n);
+  Iterable<CandidatesFieldGroup> getByCandidatesCount(int count);
+
+  /**
+   * @param count the {@link Candidates#getInclusionCount() inclusion count}. Should be in the range from {@code 2} to
+   *        <code>{@link Sudoku#getSize()}-1</code>.
+   * @return the first {@link CandidatesFieldGroup}s per {@link CandidatesFieldGroup#getCandidates() candidates} or
+   *         {@code null} if none exists.
+   */
+  CandidatesFieldGroup getFirstByCandidatesCount(int count);
 
 }

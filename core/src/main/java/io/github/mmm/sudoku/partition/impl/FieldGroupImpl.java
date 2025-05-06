@@ -12,23 +12,27 @@ import io.github.mmm.sudoku.field.FieldGroup;
  */
 public class FieldGroupImpl implements FieldGroup {
 
-  private final boolean locked;
+  boolean locked;
 
   private int count;
 
-  private FieldListNode fields;
+  FieldListNode fields;
 
   FieldGroupImpl() {
 
     super();
-    this.locked = false;
   }
 
   FieldGroupImpl(Field field) {
 
     super();
     add(field);
-    this.locked = false;
+    lock();
+  }
+
+  void lock() {
+
+    this.locked = true;
   }
 
   @Override

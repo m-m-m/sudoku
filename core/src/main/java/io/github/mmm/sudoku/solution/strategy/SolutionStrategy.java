@@ -2,6 +2,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0 */
 package io.github.mmm.sudoku.solution.strategy;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.github.mmm.sudoku.common.AttributeDifficulty;
@@ -14,6 +15,7 @@ import io.github.mmm.sudoku.solution.HintStep;
 import io.github.mmm.sudoku.solution.HintStepFieldExcludeCandidate;
 import io.github.mmm.sudoku.solution.HintStepFieldSetValue;
 import io.github.mmm.sudoku.solution.HintStepFieldsExcludeCandidates;
+import io.github.mmm.sudoku.solution.HintStepFieldsIntersectCandidates;
 import io.github.mmm.sudoku.solution.HintStepFieldsMarking;
 import io.github.mmm.sudoku.solution.HintStepPartitionMarking;
 import io.github.mmm.sudoku.solution.Solver;
@@ -82,13 +84,33 @@ public abstract class SolutionStrategy implements Solver, AttributeDifficulty, C
   }
 
   /**
+   * @param candidates the {@link Candidates} to {@link Candidates#exclude(Candidates) exclude}.
+   * @param fields the {@link Field} where to {@link Field#excludeCandidate(int) exclude}.
+   * @return the {@link HintStepFieldsExcludeCandidates}.
+   */
+  protected HintStepFieldsExcludeCandidates exclude(Candidates candidates, Iterable<Field> fields) {
+
+    return new HintStepFieldsExcludeCandidates(getName(), FieldGroup.toArray(fields), candidates);
+  }
+
+  /**
    * @param fields the {@link Field} where to {@link Field#excludeCandidate(int) exclude}.
    * @param candidates the {@link Candidates} to {@link Candidates#exclude(Candidates) exclude}.
    * @return the {@link HintStepFieldsExcludeCandidates}.
    */
-  protected HintStepFieldsExcludeCandidates exclude(Iterable<Field> fields, Candidates candidates) {
+  protected HintStepFieldsExcludeCandidates exclude(Candidates candidates, Field... fields) {
 
-    return new HintStepFieldsExcludeCandidates(getName(), FieldGroup.toArray(fields), candidates);
+    return new HintStepFieldsExcludeCandidates(getName(), fields, candidates);
+  }
+
+  /**
+   * @param fields the {@link Field} where to {@link Field#excludeCandidate(int) exclude}.
+   * @param candidates the {@link Candidates} to {@link Candidates#exclude(Candidates) exclude}.
+   * @return the {@link HintStepFieldsIntersectCandidates}.
+   */
+  protected HintStepFieldsIntersectCandidates intersect(Candidates candidates, Field... fields) {
+
+    return new HintStepFieldsIntersectCandidates(getName(), fields, candidates);
   }
 
   @Override
@@ -98,6 +120,59 @@ public abstract class SolutionStrategy implements Solver, AttributeDifficulty, C
       return -1;
     }
     return getDifficulty() - other.getDifficulty();
+  }
+
+  /**
+   * @param group the {@link FieldGroup} to {@link FieldGroup#iterator() iterate} to add potential fields.
+   * @param candidates the {@link Candidates} to use as mask. Only if {@link Field}s that {@link Field#hasCandidate(int)
+   *        has a candidate} not included in this given {@link Candidates} it will be considered.
+   * @param excludedFields the {@link Field}s that are explicitly excluded and shall not be considered.
+   * @return the {@link List} where all {@link Field}s have been added from the given {@link FieldGroup} that are not in
+   *         the {@code excludedFields} and have additional {@link Candidates} (to eliminate).
+   */
+  protected List<Field> addFields(FieldGroup group, Candidates candidates, Field... excludedFields) {
+
+    return addFields(null, group, candidates, excludedFields);
+  }
+
+  /**
+   * @param fields the {@link List} where to add the {@link Field}s.
+   * @param group the {@link FieldGroup} to {@link FieldGroup#iterator() iterate} to add potential fields.
+   * @param candidates the {@link Candidates} to use as mask. Only if {@link Field}s that {@link Field#hasCandidate(int)
+   *        has a candidate} not included in this given {@link Candidates} it will be considered.
+   * @param excludedFields the {@link Field}s that are explicitly excluded and shall not be considered.
+   * @return the {@link List} where all {@link Field}s have been added from the given {@link FieldGroup} that are not in
+   *         the {@code excludedFields} and have additional {@link Candidates} (to eliminate).
+   */
+  protected List<Field> addFields(List<Field> fields, FieldGroup group, Candidates candidates,
+      Field... excludedFields) {
+
+    for (Field field : group) {
+      if (!field.hasValue() && field.hasAtLeastOneCandidateOf(candidates)) {
+        if (!contains(field, excludedFields)) {
+          if (fields == null) {
+            fields = new ArrayList<>();
+          }
+          fields.add(field);
+        }
+      }
+    }
+    return fields;
+  }
+
+  /**
+   * @param field the {@link Field} to check.
+   * @param fields the array of {@link Field}s.
+   * @return {@code true} if the given {@link Field} is contained in the given array.
+   */
+  protected boolean contains(Field field, Field[] fields) {
+
+    for (Field f : fields) {
+      if (f == field) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

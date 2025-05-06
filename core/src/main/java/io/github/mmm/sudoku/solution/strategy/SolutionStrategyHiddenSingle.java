@@ -24,12 +24,12 @@ public class SolutionStrategyHiddenSingle extends SolutionStrategyByPartition {
   protected Hint findHint(Partition partition) {
 
     PartitionMap partitionMap = partition.getPartitionMap();
-    for (AggregatedFieldGroup tuple : partitionMap.getByTuples(1)) {
-      int value = tuple.getCandidate();
-      assert (tuple.getFieldCount() == 1);
-      for (Field field : tuple) {
+    int size = partition.getSudoku().getSize();
+    for (int value = 1; value <= size; value++) {
+      AggregatedFieldGroup group = partitionMap.getByCandidate(value);
+      if (group.getFieldCount() == 1) {
+        Field field = group.getField(1);
         if (!field.hasValue()) {
-          assert (field.getSingle() == value);
           return hint(mark(partition), setValue(field, value));
         }
       }

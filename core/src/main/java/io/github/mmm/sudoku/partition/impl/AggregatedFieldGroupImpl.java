@@ -3,27 +3,24 @@
 package io.github.mmm.sudoku.partition.impl;
 
 import io.github.mmm.sudoku.field.AggregatedFieldGroup;
-import io.github.mmm.sudoku.field.Field;
+import io.github.mmm.sudoku.partition.Partition;
 
 /**
- * Implementation of {@link AggregatedFieldGroup} for {@link PartitionMapImpl#getByTuples(int)}.
+ * Implementation of {@link AggregatedFieldGroup}.
  */
-public class AggregatedFieldGroupImpl extends FieldGroupImpl implements AggregatedFieldGroup {
+public class AggregatedFieldGroupImpl extends IndexedFieldGroupImpl implements AggregatedFieldGroup {
 
   private final int candidate;
 
-  AggregatedFieldGroupImpl next;
+  AggregatedFieldGroupImpl(Partition partition, int candidate) {
 
-  AggregatedFieldGroupImpl(int candidate) {
-
-    super();
+    super(partition);
     this.candidate = candidate;
   }
 
-  AggregatedFieldGroupImpl(int candidate, Field field) {
+  AggregatedFieldGroupImpl(Partition partition, int candidate, int fieldIndex) {
 
-    super(field);
-    assert field.hasValue();
+    super(partition, fieldIndex);
     this.candidate = candidate;
   }
 

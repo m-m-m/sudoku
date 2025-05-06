@@ -315,6 +315,31 @@ public final class Field extends SudokuChildObject {
   }
 
   /**
+   * @param other the {@link Candidates} to check.
+   * @return {@code true} if this {@link Field} {@link Field#hasCandidate(int) has} at least one of the given
+   *         {@link Candidates}.
+   */
+  public boolean hasAtLeastOneCandidateOf(Candidates other) {
+
+    // candidates = {3,4}, other = {1,2,3} -> exclusion = {4} != candidates
+    // candidates = {4,5}, other = {1,2,3} -> exclusion = {4,5} == candidates
+    return (this.candidates != this.candidates.exclude(other));
+  }
+
+  /**
+   * @param other the {@link Candidates} to check.
+   * @return {@code true} if this {@link Field} {@link Field#hasCandidate(int) has} at least one other candidate not
+   *         from the given {@link Candidates}.
+   */
+  public boolean hasOtherCandidatesThan(Candidates other) {
+
+    // candidates = {3,4}, other = {1,2,3}, union = {1,2,3,4} != other
+    // candidates = {2,3}, other = {1,2,3}, union = {1,2,3} == other
+
+    return (other != this.candidates.union(other));
+  }
+
+  /**
    * @param candidate the {@link #hasCandidate(int) candidate} to exclude.
    * @return {@code true} if something actually changed, {@code false} otherwise.
    */
@@ -366,13 +391,8 @@ public final class Field extends SudokuChildObject {
    */
   public int getSingle() {
 
-    if (getIncludedCandidateCount() == 1) {
-      int size = this.sudoku.getSize();
-      for (int i = 1; i <= size; i++) {
-        if (this.candidates.has(i)) {
-          return i;
-        }
-      }
+    if (this.candidates.getInclusionCount() == 1) {
+      return this.candidates.getLowestCandidate();
     }
     return UNDEFINED;
   }

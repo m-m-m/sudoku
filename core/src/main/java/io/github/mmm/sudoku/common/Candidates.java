@@ -138,20 +138,35 @@ public class Candidates {
   }
 
   /**
-   * @return the lowest {@link #has(int) candidate} or {@code -1} in case of no candidate.
+   * @param i the index of the requested candidate in the range from {@code 1} to {@link #getInclusionCount()}.
+   * @return the requested candiate or {@code -1} if the index is out of range.
    */
-  public int getLowestCandidate() {
+  public int getCandidate(int i) {
 
-    if (this.bits == 0) {
+    if ((this.bits == 0) || (i < 1)) {
       return -1;
     }
     int result = 1;
     int myBits = this.bits;
-    while ((myBits & 1) == 0) {
+    while (myBits != 0) {
+      if ((myBits & 1) == 1) {
+        i--;
+        if (i == 0) {
+          return result;
+        }
+      }
       result++;
       myBits = myBits >> 1;
     }
-    return result;
+    return -1;
+  }
+
+  /**
+   * @return the lowest {@link #has(int) candidate} or {@code -1} in case of no candidate.
+   */
+  public int getLowestCandidate() {
+
+    return getCandidate(1);
   }
 
   /**
