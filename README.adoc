@@ -79,3 +79,32 @@ Module Dependency:
 ```java
   requires transitive io.github.mmm.sudoku.fx;
 ```
+
+= Research
+
+Sudokus are an interesting topic both from mathematics as well as from computer-science.
+Implementing this project allowed me to apply my knowledge about maths, graph-theory, data-modelling, boolean algebra and bit-mapping, efficient algorithm design, and many other disciplines.
+The following links helped me to learn more about the topic and could be interesting also for others interested in this topic.
+
+* https://en.wikipedia.org/wiki/Mathematics_of_Sudoku[Mathematics of Sudoku] (Wikipedia)
+* https://uol.de/f/2/dept/informatik/ag/parsys/grahl_killersudokus_150222.pdf[Masterarbeit: Analyse, Implementierung und Vergleich von Strategien zum Lösen, Generieren und Bewerten von Killer-Sudokus] (Uwe Grahl)
+* https://ct.de/yabc[Sudokus bewerten per Python-Skript] (ct' Magazin, Heise Medien)
+* https://www.baeldung.com/java-sudoku[Create a Sudoku Solver in Java] (Baeldung)
+* https://www.sudokuwiki.org/[SudokuWiki]
+* https://sudoku.coach/[sudoku.coach]
+* https://en.wikipedia.org/wiki/Glossary_of_Sudoku[Glossary of Sudoku] (Wikipedia)
+* https://www.kakuro-knacker.de/pdf/summen_kombinationen.pdf[Summen Kombinationen]
+
+Other open-source Sudoku implementations:
+
+* https://ct.de/yabc[Sudokus bewerten per Python-Skript] (ct' Magazin, Heise Medien)
+* https://pyimagesearch.com/2020/08/10/opencv-sudoku-solver-and-ocr/[OpenCV Sudoku Solver and OCR]
+* https://github.com/BenJeau/JavaFX-Sudoku[JavaFX-Sudoku] (BenJeau)
+* https://github.com/ksokolovic/JSudoku[JSudoku] (ksokolovic)
+* https://github.com/oscr/JSudoku[JSudoku] (oscr)
+* 
+
+Best Android Sudoku Apps:
+
+* https://www.andoku.com/apps/andoku3/[Andoku3]
+* https://play.google.com/store/apps/details?id=com.conceptispuzzles.sumsudoku&hl=de&pli=1[SumDoku]
