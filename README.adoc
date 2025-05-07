@@ -97,6 +97,7 @@ The following links helped me to learn more about the topic and could be interes
 * https://sudoku.coach/[sudoku.coach]
 * https://www.kaggle.com/datasets/rohanrao/sudoku[9 Million Sudoku Puzzles and Solutions]
 * https://en.wikipedia.org/wiki/Glossary_of_Sudoku[Glossary of Sudoku] (Wikipedia)
+* https://math.stackexchange.com/questions/2684500/my-simple-combinatorial-method-to-enumerate-all-sudoku-solution-grids[My Simple Combinatorial Method to Enumerate All Sudoku Solution Grids] (Discussion)
 * https://www.kakuro-knacker.de/pdf/summen_kombinationen.pdf[Summen Kombinationen]
 
 Other open-source Sudoku implementations:
