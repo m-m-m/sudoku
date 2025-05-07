@@ -1,7 +1,10 @@
+:toc: macro
 image:https://m-m-m.github.io/logo.svg[logo,width="150",link="https://m-m-m.github.io"]
 
 image:https://img.shields.io/github/license/m-m-m/sudoku.svg?label=License["Apache License, Version 2.0",link=https://github.com/m-m-m/sudoku/blob/main/LICENSE]
 image:https://github.com/m-m-m/sudoku/actions/workflows/build.yml/badge.svg["Build Status",link="https://github.com/m-m-m/sudoku/actions/workflows/build.yml"]
+
+toc::[]
 
 = mmm-sudoku
 
@@ -92,16 +95,19 @@ The following links helped me to learn more about the topic and could be interes
 * https://www.baeldung.com/java-sudoku[Create a Sudoku Solver in Java] (Baeldung)
 * https://www.sudokuwiki.org/[SudokuWiki]
 * https://sudoku.coach/[sudoku.coach]
+* https://www.kaggle.com/datasets/rohanrao/sudoku[9 Million Sudoku Puzzles and Solutions]
 * https://en.wikipedia.org/wiki/Glossary_of_Sudoku[Glossary of Sudoku] (Wikipedia)
 * https://www.kakuro-knacker.de/pdf/summen_kombinationen.pdf[Summen Kombinationen]
 
 Other open-source Sudoku implementations:
 
 * https://ct.de/yabc[Sudokus bewerten per Python-Skript] (ct' Magazin, Heise Medien)
+* https://github.com/t-dillon/tdoku[tdoku] (t-dillon) C++
+* https://github.com/tejasmorkar/sudoku-solver[sudoku-solver] (tejasmorkar) Python 
 * https://pyimagesearch.com/2020/08/10/opencv-sudoku-solver-and-ocr/[OpenCV Sudoku Solver and OCR]
-* https://github.com/BenJeau/JavaFX-Sudoku[JavaFX-Sudoku] (BenJeau)
-* https://github.com/ksokolovic/JSudoku[JSudoku] (ksokolovic)
-* https://github.com/oscr/JSudoku[JSudoku] (oscr)
+* https://github.com/BenJeau/JavaFX-Sudoku[JavaFX-Sudoku] (BenJeau) Java
+* https://github.com/ksokolovic/JSudoku[JSudoku] (ksokolovic) Java
+* https://github.com/oscr/JSudoku[JSudoku] (oscr) Java
 * 
 
 Best Android Sudoku Apps:
