@@ -3,6 +3,8 @@ package io.github.mmm.sudoku.fx;
 import io.github.mmm.sudoku.Sudoku;
 import io.github.mmm.sudoku.history.ChangeSet;
 import io.github.mmm.sudoku.solution.Hint;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 
@@ -20,6 +22,8 @@ public class SudokuFxActionButtons extends HBox implements SudokuFxView {
   private final Button redoButton;
 
   private final Button hintButton;
+
+  private final Button verifyButton;
 
   /**
    * The constructor.
@@ -45,6 +49,10 @@ public class SudokuFxActionButtons extends HBox implements SudokuFxView {
     this.hintButton.setAccessibleHelp("hint");
     this.hintButton.setOnAction(e -> onHint());
     getChildren().add(this.hintButton);
+    this.verifyButton = new Button("✓");
+    this.verifyButton.setAccessibleHelp("verify");
+    this.verifyButton.setOnAction(e -> onVerify());
+    getChildren().add(this.verifyButton);
     update();
   }
 
@@ -73,6 +81,33 @@ public class SudokuFxActionButtons extends HBox implements SudokuFxView {
       this.sudoku.apply(hint);
       update();
     }
+  }
+
+  private void onVerify() {
+
+    int errorCount = this.sudoku.verify();
+    AlertType type;
+    String title;
+    String header;
+    String content;
+    if (errorCount == 0) {
+      type = AlertType.INFORMATION;
+      title = "Validation successful";
+      header = "Well done";
+      content = "Good job, no errors so far!";
+    } else {
+      type = AlertType.ERROR;
+      title = "Validation failed";
+      header = "Oops";
+      content = "Sorry, but you have " + errorCount
+          + " error(s). Please undo your changes until all errors are resolved.";
+    }
+    Alert alert = new Alert(type);
+    alert.setTitle(title);
+    alert.setHeaderText(header);
+    alert.setContentText(content);
+
+    alert.showAndWait();
   }
 
   @Override

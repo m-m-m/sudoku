@@ -37,6 +37,7 @@ import io.github.mmm.sudoku.partitioning.Sum;
 import io.github.mmm.sudoku.solution.AbstractHint;
 import io.github.mmm.sudoku.solution.Hint;
 import io.github.mmm.sudoku.solution.HintStep;
+import io.github.mmm.sudoku.solution.SudokuSolver;
 
 /**
  * Represents a Sudoku puzzle.<br>
@@ -347,6 +348,31 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
       assert (this.lastChange == null) : "Given clues should be set before actual values!";
     }
     return error;
+  }
+
+  /**
+   * Verifies this {@link Sudoku} assuming that {@link SudokuSolver#solve(Sudoku, boolean) solutions are computed}.
+   *
+   * @return the number or errors or {@code 0} if all is valid.
+   */
+  public int verify() {
+
+    int errorCount = 0;
+    int size = getSize();
+    int max = size * size;
+    ChangeSet changeSet = null;
+    for (int i = 1; i <= max; i++) {
+      Field field = getField(i);
+      if (!field.isValid()) {
+        if (changeSet == null) {
+          changeSet = startUndoHistory();
+        }
+        field.setError(true);
+        errorCount++;
+      }
+    }
+    endUndoHistory(changeSet);
+    return errorCount;
   }
 
   /**

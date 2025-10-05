@@ -512,6 +512,19 @@ public final class Field extends SudokuChildObject {
   }
 
   /**
+   * @return {@code true} if this {@link Field} is valid, {@code false} otherwise (mistake was made).
+   */
+  public boolean isValid() {
+
+    assert hasSolution();
+    if (hasValue()) {
+      return (this.value == this.solution);
+    } else {
+      return this.candidates.has(this.solution);
+    }
+  }
+
+  /**
    * @return {@code true} if this {@link Field} is currently marked as error (conflicts with other value), {@code false}
    *         otherwise.
    */

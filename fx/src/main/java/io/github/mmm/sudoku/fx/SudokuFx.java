@@ -29,7 +29,7 @@ public class SudokuFx extends Application {
     Sudoku sudoku = generateSudoku();
     this.fxPuzzle = new SudokuFxPuzzle(sudoku);
 
-    Scene scene = new Scene(this.fxPuzzle, 500, 500);
+    Scene scene = new Scene(this.fxPuzzle, 600, 500);
     scene.getStylesheets().add("file:src/main/resources/css/application.css");
     primaryStage.setScene(scene);
     primaryStage.setTitle("SudokuFx");
