@@ -94,8 +94,6 @@ public class SolutionStrategyXWing extends SolutionStrategy {
       } else {
         return null;
       }
-      // fields = addFields(fields, candidate, f11.getPartition(1), f11, f12);
-      // fields = addFields(fields, candidate, f21.getPartition(1), f21, f22);
       fields = addFields(fields, candidate, f11.getPartition(2), f11, f21);
       fields = addFields(fields, candidate, f12.getPartition(2), f12, f22);
     } else {
@@ -119,8 +117,6 @@ public class SolutionStrategyXWing extends SolutionStrategy {
       }
       fields = addFields(fields, candidate, f11.getPartition(1), f11, f21);
       fields = addFields(fields, candidate, f12.getPartition(1), f12, f22);
-      // fields = addFields(fields, candidate, f11.getPartition(2), f11, f21);
-      // fields = addFields(fields, candidate, f12.getPartition(2), f12, f22);
     }
     if (fields != null) {
       return hint(mark(f11, f12, f21, f22), exclude(Candidates.ofValue(candidate), fields));
@@ -146,7 +142,7 @@ public class SolutionStrategyXWing extends SolutionStrategy {
   @Override
   public int getDifficulty() {
 
-    return 30;
+    return 40;
   }
 
   @Override

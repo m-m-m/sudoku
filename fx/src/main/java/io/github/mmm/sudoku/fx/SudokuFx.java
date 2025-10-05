@@ -3,6 +3,7 @@
 package io.github.mmm.sudoku.fx;
 
 import io.github.mmm.sudoku.Sudoku;
+import io.github.mmm.sudoku.solution.SudokuSolver;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -39,7 +40,10 @@ public class SudokuFx extends Application {
 
   private static Sudoku generateSudoku() {
 
-    return generateHyperSudoku();
+    Sudoku sudoku = generateHyperSudoku();
+    boolean fillValues = false;
+    SudokuSolver.get().solve(sudoku, fillValues);
+    return sudoku;
   }
 
   private static Sudoku generateXSudoku() {

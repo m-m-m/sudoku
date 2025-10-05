@@ -16,6 +16,7 @@ import io.github.mmm.sudoku.common.Candidates;
 import io.github.mmm.sudoku.event.SudokuChangeEventCandidates;
 import io.github.mmm.sudoku.event.SudokuChangeEventSetError;
 import io.github.mmm.sudoku.event.SudokuChangeEventSetMarked;
+import io.github.mmm.sudoku.event.SudokuChangeEventSetSolution;
 import io.github.mmm.sudoku.event.SudokuChangeEventSetValue;
 import io.github.mmm.sudoku.event.SudokuEvent;
 import io.github.mmm.sudoku.partition.Partition;
@@ -476,7 +477,7 @@ public final class Field extends SudokuChildObject {
     validateValue(solution, true);
     int oldSolution = this.solution;
     this.solution = solution;
-    fireEvent(new SudokuChangeEventSetValue(this, oldSolution, solution));
+    fireEvent(new SudokuChangeEventSetSolution(this, oldSolution, solution));
     return true;
   }
 

@@ -76,6 +76,10 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
 
   private final String type;
 
+  private final RegionFactory factory;
+
+  private final PartitioningFactory[] factories;
+
   private int modificationCounter;
 
   private ChangeSet lastChange;
@@ -99,7 +103,35 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
    */
   public Sudoku(AbstractDimension dimension, RegionFactory factory, PartitioningFactory... factories) {
 
-    super();
+    this(null, dimension, factory, factories);
+  }
+
+  /**
+   * The copy constructor.
+   *
+   * @param template the {@link Sudoku} to copy.
+   */
+  private Sudoku(Sudoku template) {
+
+    this(template, template.dimension, template.factory, template.factories);
+    int size = getSize();
+    for (int x = 1; x <= size; x++) {
+      for (int y = 1; y <= size; y++) {
+        Field myField = this.fields[x - 1][y - 1];
+        Field templateField = template.fields[x - 1][y - 1];
+        myField.setCandidates(templateField.getCandidates());
+        myField.setValue(templateField.getValue(), templateField.isGiven());
+        myField.setSolution(templateField.getValue());
+        // myField.setMarked(templateField.isMarked());
+        myField.setError(templateField.isError());
+      }
+    }
+
+  }
+
+  private Sudoku(Sudoku template, AbstractDimension dimension, RegionFactory factory,
+      PartitioningFactory... factories) {
+
     this.dimension = dimension;
     int bitMask = (2 << (dimension.getSize() - 1)) - 1;
     this.allCandidates = Candidates.of(bitMask);
@@ -114,6 +146,8 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
     }
     this.lastChange = new ChangeSet(Collections.emptyList(), null);
     this.type = computeType();
+    this.factory = factory;
+    this.factories = factories;
   }
 
   private String computeType() {
@@ -138,17 +172,6 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
       }
     }
     return compose(typeName, puzzle);
-  }
-
-  private static String compose(String s1, String s2) {
-
-    if (s1.isEmpty()) {
-      return s2;
-    } else if (s2.isEmpty()) {
-      return s1;
-    } else {
-      return s1 + "-" + s2;
-    }
   }
 
   /**
@@ -233,16 +256,34 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
   }
 
   /**
+   * Convenience method to allow iterating over all fields in a linear way.
+   *
+   * @param xy the field index as <code>(y-1) * {@link #getSize() size} + x</code>. Or in other words the index of the
+   *        requested {@link Field} in the range from {@code 1} to {@link #getSize() size}².
+   * @return the {@link Field} at the given index.
+   */
+  public Field getField(int xy) {
+
+    int size = getSize();
+    int i = xy - 1;
+    int x = i % size;
+    int y = i / size;
+    return getField(x + 1, y + 1);
+  }
+
+  /**
    * Convenience method for {@link #setFieldValue(Field, int, boolean, boolean)} to set a {@link Field#isGiven() given}
    * {@link Field#getValue() value}.
    *
    * @param x the column number starting from {@code 1}.
    * @param y the row number starting from {@code 1}.
    * @param value the given value starting from {@code 1}.
+   * @return {@code true} if an error was detected (the given {@code value} was invalid or your {@link Sudoku} was
+   *         already inconsistent), {@code false} otherwise.
    */
-  public void setFieldGivenValue(int x, int y, int value) {
+  public boolean setFieldGivenValue(int x, int y, int value) {
 
-    setFieldValue(getField(x, y), value, true, false);
+    return setFieldValue(getField(x, y), value, true, false);
   }
 
   /**
@@ -250,10 +291,12 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
    *
    * @param field the {@link Field} to update.
    * @param value the {@link Field#getValue() field value} to fill in.
+   * @return {@code true} if an error was detected (the given {@code value} was invalid or your {@link Sudoku} was
+   *         already inconsistent), {@code false} otherwise.
    */
-  public void setFieldValue(Field field, int value) {
+  public boolean setFieldValue(Field field, int value) {
 
-    setFieldValue(field, value, false, true);
+    return setFieldValue(field, value, false, true);
   }
 
   /**
@@ -264,18 +307,21 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
    * @param given - {@code true} to set the {@link Field#isGiven() given-flag} and consider the value as a <em>clue</em>
    *        during initialisation.
    * @param withHistory - {@code true} to add history events for {@link #undo() undo} support, {@code false} otherwise.
+   * @return {@code true} if an error was detected (the given {@code value} was invalid or your {@link Sudoku} was
+   *         already inconsistent), {@code false} otherwise.
    */
-  public void setFieldValue(Field field, int value, boolean given, boolean withHistory) {
+  public boolean setFieldValue(Field field, int value, boolean given, boolean withHistory) {
 
     int oldValue = field.getValue();
     if (oldValue == value) {
-      return;
+      return false;
     }
 
     ChangeSet changeSet = null;
     if (withHistory) {
       changeSet = startUndoHistory();
     }
+    boolean error = false;
     field.setValue(value, given);
     if (value > 0) {
       for (Partitioning partitioning : this.partitionings) {
@@ -285,8 +331,9 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
           for (Field neighbour : partition) {
             if ((neighbour != field) && neighbour.hasCandidate(value)) {
               if (neighbour.hasValue()) {
-                field.setError(true);
-                neighbour.setError(true);
+                error = true;
+                field.setError(error);
+                neighbour.setError(error);
               } else {
                 neighbour.excludeCandidate(value);
               }
@@ -299,6 +346,7 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
     if ((changeSet == null) && given) {
       assert (this.lastChange == null) : "Given clues should be set before actual values!";
     }
+    return error;
   }
 
   /**
@@ -409,6 +457,35 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
     }
   }
 
+  /**
+   * Reverts all changes up to the given {@code checkpoint}. Example usage:
+   *
+   * <pre>
+   * {@link ChangeSet} checkpoint = sudoku.{@link #getLastChange() getLastChange()};
+   * boolean success = trialAndError(sudoku);
+   * if (!success) {
+   *   sudoku.{@link #undo(ChangeSet) undo}(checkpoint);
+   * }
+   * </pre>
+   *
+   * @param checkpoint the previous {@link ChangeSet} to revert to.
+   * @return {@code true} on success, {@code false} otherwise (entire history was {@link #undo() undone} without ever
+   *         reaching the given {@code checkpoint}).
+   */
+  public boolean undo(ChangeSet checkpoint) {
+
+    while (true) {
+      if (this.lastChange == checkpoint) {
+        return true;
+      }
+      if (this.lastChange.getPrevious() == null) {
+        return false;
+      } else {
+        undo();
+      }
+    }
+  }
+
   @Override
   public void redo() {
 
@@ -503,6 +580,26 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
       }
     }
     return sb.toString();
+  }
+
+  /**
+   * @return a copy of this {@link Sudoku}. Will have the same "state" as this {@link Sudoku} except for the
+   *         {@link #getLastChange() event history}.
+   */
+  public Sudoku copy() {
+
+    return new Sudoku(this);
+  }
+
+  private static String compose(String s1, String s2) {
+
+    if (s1.isEmpty()) {
+      return s2;
+    } else if (s2.isEmpty()) {
+      return s1;
+    } else {
+      return s1 + "-" + s2;
+    }
   }
 
   /**

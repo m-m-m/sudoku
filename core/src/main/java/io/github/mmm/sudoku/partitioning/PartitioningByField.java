@@ -5,7 +5,7 @@ package io.github.mmm.sudoku.partitioning;
 import io.github.mmm.sudoku.Sudoku;
 
 /**
- * {@link Partitioning} that is not fixed (build-in) in {@link Sudoku} but can be configured.
+ * {@link Partitioning} that is fixed (build-in) in every {@link Sudoku}.
  */
 public abstract class PartitioningByField extends Partitioning {
 

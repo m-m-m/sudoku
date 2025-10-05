@@ -68,7 +68,7 @@ public class SudokuFxPuzzle extends BorderPane implements SudokuFxView, SudokuEv
   public SudokuSolver getSolver() {
 
     if (this.solver == null) {
-      this.solver = SudokuSolver.of();
+      this.solver = SudokuSolver.get();
     }
     return this.solver;
   }

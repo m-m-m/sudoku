@@ -27,8 +27,8 @@ public abstract class FlexiblePartitioning extends Partitioning {
 
   /**
    * @param partitioning the owning {@link Partitioning}.
-   * @param shapes
-   * @return
+   * @param shapes the {@link Shape}s.
+   * @return the created {@link Partition}s.
    */
   protected static Partition[] createPartitions(Partitioning partitioning, Shape[] shapes) {
 
