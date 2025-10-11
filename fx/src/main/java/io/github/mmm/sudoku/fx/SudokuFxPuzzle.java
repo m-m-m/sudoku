@@ -8,6 +8,9 @@ import io.github.mmm.sudoku.event.SudokuEventListener;
 import io.github.mmm.sudoku.event.SudokuEventSelectField;
 import io.github.mmm.sudoku.field.Field;
 import io.github.mmm.sudoku.solution.SudokuSolver;
+import javafx.collections.ObservableList;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
@@ -28,6 +31,8 @@ public class SudokuFxPuzzle extends BorderPane implements SudokuFxView, SudokuEv
 
   private final SudokuFxSymbolButtons candidateButtons;
 
+  private final Label messageBox;
+
   private SudokuFxField selectedFxField;
 
   private int selectedValue;
@@ -45,13 +50,18 @@ public class SudokuFxPuzzle extends BorderPane implements SudokuFxView, SudokuEv
     this.historyButtons = new SudokuFxActionButtons(this);
     this.mainButtons = new SudokuFxSymbolButtons(this, false);
     this.candidateButtons = new SudokuFxSymbolButtons(this, true);
+    this.messageBox = new Label();
+    this.messageBox.setWrapText(true);
+    this.messageBox.setMaxWidth(150);
     setCenter(this.board);
-    VBox buttonBox = new VBox();
-    buttonBox.setSpacing(10);
-    buttonBox.getChildren().add(this.historyButtons);
-    buttonBox.getChildren().add(this.mainButtons);
-    buttonBox.getChildren().add(this.candidateButtons);
-    setRight(buttonBox);
+    VBox sidePanel = new VBox();
+    sidePanel.setSpacing(10);
+    ObservableList<Node> sidePanelChildren = sidePanel.getChildren();
+    sidePanelChildren.add(this.historyButtons);
+    sidePanelChildren.add(this.mainButtons);
+    sidePanelChildren.add(this.candidateButtons);
+    sidePanelChildren.add(this.messageBox);
+    setRight(sidePanel);
     this.selectedValue = Field.UNDEFINED;
     sudoku.addListener(this);
   }
@@ -90,7 +100,7 @@ public class SudokuFxPuzzle extends BorderPane implements SudokuFxView, SudokuEv
   }
 
   @Override
-  public void onEvent(SudokuEvent event) {
+  public void onEvent(SudokuEvent<?> event) {
 
     if (event instanceof SudokuChangeEvent change) {
       Field field = change.getField();
@@ -252,6 +262,14 @@ public class SudokuFxPuzzle extends BorderPane implements SudokuFxView, SudokuEv
     } else {
       this.selectedValue = value;
     }
+  }
+
+  /**
+   * @param message the info message to display.
+   */
+  public void setMessage(String message) {
+
+    this.messageBox.setText(message);
   }
 
 }

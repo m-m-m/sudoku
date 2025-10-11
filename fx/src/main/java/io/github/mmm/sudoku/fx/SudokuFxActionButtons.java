@@ -3,8 +3,7 @@ package io.github.mmm.sudoku.fx;
 import io.github.mmm.sudoku.Sudoku;
 import io.github.mmm.sudoku.history.ChangeSet;
 import io.github.mmm.sudoku.solution.Hint;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
+import io.github.mmm.sudoku.solution.ValidationResult;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 
@@ -85,29 +84,8 @@ public class SudokuFxActionButtons extends HBox implements SudokuFxView {
 
   private void onVerify() {
 
-    int errorCount = this.sudoku.verify();
-    AlertType type;
-    String title;
-    String header;
-    String content;
-    if (errorCount == 0) {
-      type = AlertType.INFORMATION;
-      title = "Validation successful";
-      header = "Well done";
-      content = "Good job, no errors so far!";
-    } else {
-      type = AlertType.ERROR;
-      title = "Validation failed";
-      header = "Oops";
-      content = "Sorry, but you have " + errorCount
-          + " error(s). Please undo your changes until all errors are resolved.";
-    }
-    Alert alert = new Alert(type);
-    alert.setTitle(title);
-    alert.setHeaderText(header);
-    alert.setContentText(content);
-
-    alert.showAndWait();
+    ValidationResult validationResult = this.sudoku.validate();
+    this.fxPuzzle.setMessage(validationResult.toString());
   }
 
   @Override

@@ -41,6 +41,7 @@ public class SudokuFx extends Application {
   private static Sudoku generateSudoku() {
 
     Sudoku sudoku = generateHyperSudoku();
+    sudoku.setSpecified();
     boolean fillValues = false;
     SudokuSolver.get().solve(sudoku, fillValues);
     return sudoku;

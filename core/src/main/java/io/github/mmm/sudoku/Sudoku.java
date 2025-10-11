@@ -38,6 +38,7 @@ import io.github.mmm.sudoku.solution.AbstractHint;
 import io.github.mmm.sudoku.solution.Hint;
 import io.github.mmm.sudoku.solution.HintStep;
 import io.github.mmm.sudoku.solution.SudokuSolver;
+import io.github.mmm.sudoku.solution.ValidationResult;
 
 /**
  * Represents a Sudoku puzzle.<br>
@@ -81,7 +82,11 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
 
   private final PartitioningFactory[] factories;
 
+  private boolean specified;
+
   private int modificationCounter;
+
+  private int specifiedCandidateCount;
 
   private ChangeSet lastChange;
 
@@ -241,6 +246,36 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
   }
 
   /**
+   * @return {@code true} if all {@link Field#isGiven() given values} have been
+   *         {@link #setFieldGivenValue(int, int, int) set} and the {@link Sudoku} puzzle is completely specified,
+   *         {@code false} otherwise.
+   */
+  public boolean isSpecified() {
+
+    return this.specified;
+  }
+
+  /**
+   * Marks this {@link Sudoku} as fully {@link #isSpecified() specified}.
+   */
+  public void setSpecified() {
+
+    assert !this.specified;
+    if (this.specified) {
+      return;
+    }
+    int size = getSize();
+    int max = size * size;
+    for (int i = 1; i <= max; i++) {
+      Field field = getField(i);
+      if (!field.hasValue()) {
+        this.specifiedCandidateCount += field.getIncludedCandidateCount();
+      }
+    }
+    this.specified = true;
+  }
+
+  /**
    * @param x the {@link Field#getX() x-coordinate} in the range from {@code 1} to <code>{@link #getSize()}</code>.
    * @param y the {@link Field#getY() y-coordinate} in the range from {@code 1} to <code>{@link #getSize()}</code>.
    * @return the {@link Field} at the given position.
@@ -313,11 +348,17 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
    */
   public boolean setFieldValue(Field field, int value, boolean given, boolean withHistory) {
 
+    if (this.specified && given) {
+      throw new IllegalStateException("Given values cannot be set after the sudoku has been fully specified.");
+    } else if (!this.specified && !given) {
+      LOG.warn("Sudoku was set to specified automatically since the first (non-given) values was set. "
+          + "Please call setSpecified() explicitly to avoid this message.");
+      setSpecified();
+    }
     int oldValue = field.getValue();
     if (oldValue == value) {
       return false;
     }
-
     ChangeSet changeSet = null;
     if (withHistory) {
       changeSet = startUndoHistory();
@@ -355,9 +396,11 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
    *
    * @return the number or errors or {@code 0} if all is valid.
    */
-  public int verify() {
+  public ValidationResult validate() {
 
     int errorCount = 0;
+    int remainingCount = 0;
+    int candidateCount = this.specifiedCandidateCount;
     int size = getSize();
     int max = size * size;
     ChangeSet changeSet = null;
@@ -370,9 +413,15 @@ public class Sudoku extends AbstractEventSender<SudokuEvent<?>, SudokuEventListe
         field.setError(true);
         errorCount++;
       }
+      if (!field.hasValue()) {
+        remainingCount++;
+        candidateCount -= field.getIncludedCandidateCount();
+      }
     }
     endUndoHistory(changeSet);
-    return errorCount;
+    double progress = candidateCount;
+    progress = progress / this.specifiedCandidateCount;
+    return new ValidationResult(errorCount, remainingCount, progress);
   }
 
   /**
