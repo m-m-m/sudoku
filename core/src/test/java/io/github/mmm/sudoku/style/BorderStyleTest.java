@@ -8,11 +8,11 @@ import org.junit.jupiter.api.Test;
 /**
  * Test of {@link BorderStyle}.
  */
-public class BorderStyleTest extends Assertions {
+class BorderStyleTest extends Assertions {
 
   /** Test the main features of {@link BorderStyle}. */
   @Test
-  public void testMain() {
+  void testMain() {
 
     BorderStyle empty = BorderStyle.EMPTY;
     assertThat(empty.getStyle()).isNull();

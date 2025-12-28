@@ -7,11 +7,11 @@ import org.junit.jupiter.api.Test;
 /**
  * Test of {@link RectangularDimension}.
  */
-public class RectangularDimensionTest extends DimensionTest {
+class RectangularDimensionTest extends DimensionTest {
 
   /** Test of {@link RectangularDimension#D6}. */
   @Test
-  public void test6() {
+  void test6() {
 
     // arrange
     Dimension dimension = RectangularDimension.D6;
@@ -26,7 +26,7 @@ public class RectangularDimensionTest extends DimensionTest {
 
   /** Test of {@link RectangularDimension#D8}. */
   @Test
-  public void test8() {
+  void test8() {
 
     // arrange
     Dimension dimension = RectangularDimension.D8;
@@ -41,7 +41,7 @@ public class RectangularDimensionTest extends DimensionTest {
 
   /** Test of {@link RectangularDimension#D10}. */
   @Test
-  public void test10() {
+  void test10() {
 
     // arrange
     Dimension dimension = RectangularDimension.D10;
@@ -56,7 +56,7 @@ public class RectangularDimensionTest extends DimensionTest {
 
   /** Test of {@link RectangularDimension#D12}. */
   @Test
-  public void test12() {
+  void test12() {
 
     // arrange
     Dimension dimension = RectangularDimension.D12;
@@ -71,7 +71,7 @@ public class RectangularDimensionTest extends DimensionTest {
 
   /** Test of {@link RectangularDimension#D14}. */
   @Test
-  public void test14() {
+  void test14() {
 
     // arrange
     Dimension dimension = RectangularDimension.D14;
@@ -86,7 +86,7 @@ public class RectangularDimensionTest extends DimensionTest {
 
   /** Test of {@link RectangularDimension#D15}. */
   @Test
-  public void test15() {
+  void test15() {
 
     // arrange
     Dimension dimension = RectangularDimension.D15;

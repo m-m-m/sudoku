@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
  * Test of {@link Candidates}.
  */
 @SuppressWarnings("javadoc")
-public class CandidatesTest extends Assertions {
+class CandidatesTest extends Assertions {
 
   @Test
-  public void testOfNone() {
+  void testOfNone() {
 
     // arrange
     Candidates candidates;
@@ -30,7 +30,7 @@ public class CandidatesTest extends Assertions {
   }
 
   @Test
-  public void testOdds() {
+  void testOdds() {
 
     // arrage
     Candidates candidates;
@@ -52,7 +52,7 @@ public class CandidatesTest extends Assertions {
   }
 
   @Test
-  public void testPooling() {
+  void testPooling() {
 
     // arrange
     Candidates none = Candidates.ofNone();

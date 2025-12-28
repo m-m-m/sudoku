@@ -7,11 +7,11 @@ import org.junit.jupiter.api.Test;
 /**
  * Test of {@link PrimeDimension}.
  */
-public class PrimeDimensionTest extends DimensionTest {
+class PrimeDimensionTest extends DimensionTest {
 
   /** Test of {@link PrimeDimension#D5}. */
   @Test
-  public void test5() {
+  void test5() {
 
     // arrange
     Dimension dimension = PrimeDimension.D5;
@@ -24,7 +24,7 @@ public class PrimeDimensionTest extends DimensionTest {
 
   /** Test of {@link PrimeDimension#D7}. */
   @Test
-  public void test7() {
+  void test7() {
 
     // arrange
     Dimension dimension = PrimeDimension.D7;
@@ -37,7 +37,7 @@ public class PrimeDimensionTest extends DimensionTest {
 
   /** Test of {@link PrimeDimension#D11}. */
   @Test
-  public void test11() {
+  void test11() {
 
     // arrange
     Dimension dimension = PrimeDimension.D11;
@@ -50,7 +50,7 @@ public class PrimeDimensionTest extends DimensionTest {
 
   /** Test of {@link PrimeDimension#D13}. */
   @Test
-  public void test13() {
+  void test13() {
 
     // arrange
     Dimension dimension = PrimeDimension.D13;
@@ -63,7 +63,7 @@ public class PrimeDimensionTest extends DimensionTest {
 
   /** Test of {@link PrimeDimension#D17}. */
   @Test
-  public void test17() {
+  void test17() {
 
     // arrange
     Dimension dimension = PrimeDimension.D17;
@@ -76,7 +76,7 @@ public class PrimeDimensionTest extends DimensionTest {
 
   /** Test of {@link PrimeDimension#D19}. */
   @Test
-  public void test19() {
+  void test19() {
 
     // arrange
     Dimension dimension = PrimeDimension.D19;
@@ -89,7 +89,7 @@ public class PrimeDimensionTest extends DimensionTest {
 
   /** Test of {@link PrimeDimension#D23}. */
   @Test
-  public void test23() {
+  void test23() {
 
     // arrange
     Dimension dimension = PrimeDimension.D23;
@@ -102,7 +102,7 @@ public class PrimeDimensionTest extends DimensionTest {
 
   /** Test of {@link PrimeDimension#D29}. */
   @Test
-  public void test29() {
+  void test29() {
 
     // arrange
     Dimension dimension = PrimeDimension.D29;
@@ -115,7 +115,7 @@ public class PrimeDimensionTest extends DimensionTest {
 
   /** Test of {@link PrimeDimension#D31}. */
   @Test
-  public void test31() {
+  void test31() {
 
     // arrange
     Dimension dimension = PrimeDimension.D31;
@@ -128,7 +128,7 @@ public class PrimeDimensionTest extends DimensionTest {
 
   /** Test of {@link PrimeDimension#D37}. */
   @Test
-  public void test37() {
+  void test37() {
 
     // arrange
     Dimension dimension = PrimeDimension.D37;

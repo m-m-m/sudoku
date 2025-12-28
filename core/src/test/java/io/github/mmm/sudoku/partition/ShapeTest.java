@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Test;
 /**
  * Test of {@link Shape}.
  */
-public class ShapeTest extends Assertions {
+class ShapeTest extends Assertions {
 
   @Test
-  public void testBox() {
+  void testBox() {
 
     // arrange
     Shape shape = new Shape(0, 3, null);
@@ -23,7 +23,7 @@ public class ShapeTest extends Assertions {
   }
 
   @Test
-  public void testRow() {
+  void testRow() {
 
     // arrange
     Shape shape = new Shape(0, 9, null);
@@ -35,7 +35,7 @@ public class ShapeTest extends Assertions {
   }
 
   @Test
-  public void testColumn() {
+  void testColumn() {
 
     // arrange
     Shape shape = new Shape(0, 1, null);
@@ -55,7 +55,7 @@ public class ShapeTest extends Assertions {
   }
 
   @Test
-  public void testPlus() {
+  void testPlus() {
 
     // arrange
     Shape shape = new Shape(0, 1, null);
@@ -69,7 +69,7 @@ public class ShapeTest extends Assertions {
   }
 
   @Test
-  public void testRightBottom() {
+  void testRightBottom() {
 
     // arrange
     Shape shape = new Shape(-2, 3, null);

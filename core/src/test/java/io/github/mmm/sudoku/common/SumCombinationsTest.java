@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 /**
  * Test of {@link SumCombinations}.
  */
-public class SumCombinationsTest extends Assertions {
+class SumCombinationsTest extends Assertions {
 
   @Test
-  public void test9x9Max() {
+  void test9x9Max() {
 
     SumCombinations sumCombinations = new SumCombinations(9);
     Set<Candidates> combinations = sumCombinations.getCombinations(45, 9);
@@ -19,7 +19,7 @@ public class SumCombinationsTest extends Assertions {
   }
 
   @Test
-  public void test9x9Min() {
+  void test9x9Min() {
 
     SumCombinations sumCombinations = new SumCombinations(9);
     Set<Candidates> combinations = sumCombinations.getCombinations(3, 2);
@@ -27,7 +27,7 @@ public class SumCombinationsTest extends Assertions {
   }
 
   @Test
-  public void test9x9Mid() {
+  void test9x9Mid() {
 
     SumCombinations sumCombinations = new SumCombinations(9);
     Set<Candidates> combinations = sumCombinations.getCombinations(20, 4);

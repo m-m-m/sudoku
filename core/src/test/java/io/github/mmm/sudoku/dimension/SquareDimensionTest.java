@@ -7,11 +7,11 @@ import org.junit.jupiter.api.Test;
 /**
  * Test of {@link SquareDimension}.
  */
-public class SquareDimensionTest extends DimensionTest {
+class SquareDimensionTest extends DimensionTest {
 
   /** Test of {@link SquareDimension#D4}. */
   @Test
-  public void testEasy() {
+  void testEasy() {
 
     // arrange
     Dimension dimension = SquareDimension.D4;
@@ -25,7 +25,7 @@ public class SquareDimensionTest extends DimensionTest {
 
   /** Test of {@link SquareDimension#D9}. */
   @Test
-  public void testNormal() {
+  void testNormal() {
 
     // arrange
     Dimension dimension = SquareDimension.D9;
@@ -39,7 +39,7 @@ public class SquareDimensionTest extends DimensionTest {
 
   /** Test of {@link SquareDimension#D16}. */
   @Test
-  public void test16() {
+  void test16() {
 
     // arrange
     Dimension dimension = SquareDimension.D16;
@@ -53,7 +53,7 @@ public class SquareDimensionTest extends DimensionTest {
 
   /** Test of {@link SquareDimension#of(int, java.util.List)} for HEX 16x16. */
   @Test
-  public void test16Hex() {
+  void test16Hex() {
 
     // arrange
     Dimension dimension = SquareDimension.of(4, AbstractDimension.toAlphabet("0123456789ABCDEF"));
